@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+dist/
+site/
+test-results/
+playwright-report/
+*.tgz
+.DS_Store

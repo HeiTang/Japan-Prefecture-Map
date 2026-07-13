@@ -1,0 +1,57 @@
+{
+  "name": "japan-prefecture-map",
+  "version": "0.1.0",
+  "description": "A dependency-free Web Component for visualizing Japan prefecture travel levels.",
+  "type": "module",
+  "license": "MIT",
+  "author": "HeiTang",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HeiTang/japan-prefecture-map.git"
+  },
+  "homepage": "https://heitang.github.io/japan-prefecture-map/",
+  "bugs": "https://github.com/HeiTang/japan-prefecture-map/issues",
+  "keywords": [
+    "japan",
+    "prefecture",
+    "map",
+    "web-component",
+    "svg",
+    "travel"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": [
+    "dist/index.*",
+    "dist/data.*",
+    "dist/model.*",
+    "dist/geometry.*",
+    "dist/render.*",
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./data": {
+      "types": "./dist/data.d.ts",
+      "import": "./dist/data.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build-site.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs && playwright test",
+    "test:unit": "npm run build && node --test test/*.test.mjs",
+    "test:browser": "npm run build && playwright test",
+    "pack:check": "npm pack --dry-run --cache .npm-cache"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "typescript": "^5.9.2"
+  }
+}

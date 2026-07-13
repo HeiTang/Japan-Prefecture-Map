@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="產生可嵌入任何網站的日本 47 都道府縣制縣圖。" />
+    <title>Japan Prefecture Map Editor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background: #0c1016;
+        color: #f7f8fa;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      button, select { font: inherit; }
+      a { color: #ff9a6f; }
+
+      .shell {
+        width: min(1320px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 3rem 0 5rem;
+      }
+
+      header { max-width: 760px; margin-bottom: 2rem; }
+      h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.04em; }
+      header p { color: #a9b3c1; line-height: 1.7; }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 1.25rem;
+        align-items: start;
+      }
+
+      .panel {
+        padding: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.25rem;
+        background: #151a22;
+      }
+
+      .controls { position: sticky; top: 1rem; }
+      .field { display: grid; gap: 0.45rem; margin-bottom: 1rem; }
+      label { color: #a9b3c1; font-size: 0.78rem; font-weight: 700; }
+
+      select,
+      button {
+        min-height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 0.75rem;
+        background: #202733;
+        color: #fff;
+      }
+
+      select { width: 100%; padding: 0 0.75rem; }
+      button { padding: 0 1rem; cursor: pointer; font-weight: 700; }
+      button:hover, button:focus-visible { border-color: #ff9a6f; }
+      .actions { display: flex; gap: 0.65rem; margin-bottom: 1rem; }
+      .primary { background: #f66f41; border-color: #f66f41; }
+
+      pre {
+        overflow: auto;
+        margin: 0.5rem 0 0;
+        padding: 0.9rem;
+        border-radius: 0.75rem;
+        background: #0c1016;
+        color: #d7dee8;
+        font: 0.72rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .hint, #copy-status { color: #a9b3c1; font-size: 0.75rem; line-height: 1.55; }
+      #copy-status { min-height: 1.2em; }
+
+      @media (max-width: 900px) {
+        .workspace { grid-template-columns: 1fr; }
+        .controls { position: static; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <h1>Japan Prefecture Map Editor</h1>
+        <p>直接點擊地圖循環 Level 0–5，完成後複製設定。公開元件預設唯讀，編輯行為只存在這個工具頁。</p>
+      </header>
+
+      <div class="workspace">
+        <section aria-label="地圖預覽">
+          <japan-prefecture-map id="preview" locale="zh-TW" theme="dark" levels="{}"></japan-prefecture-map>
+        </section>
+
+        <aside class="panel controls" aria-label="編輯設定">
+          <div class="field">
+            <label for="locale">語系</label>
+            <select id="locale">
+              <option value="zh-TW">繁體中文</option>
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="theme">主題</label>
+            <select id="theme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button id="copy" class="primary" type="button">複製嵌入碼</button>
+            <button id="reset" type="button">重設</button>
+          </div>
+          <p id="copy-status" role="status" aria-live="polite"></p>
+
+          <p class="hint">先安裝並在你的 client entry 匯入：</p>
+          <pre><code>npm install japan-prefecture-map
+
+import 'japan-prefecture-map';</code></pre>
+          <p class="hint">再貼入元件：</p>
+          <pre><code id="markup"></code></pre>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="./dist/editor.js"></script>
+  </body>
+</html>
