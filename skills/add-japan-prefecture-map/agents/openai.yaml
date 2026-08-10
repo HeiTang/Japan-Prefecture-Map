@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Japan Prefecture Map"
+  short_description: "引導設定並整合日本都道府縣地圖到現有 Blog 網站"
+  default_prompt: "Use $add-japan-prefecture-map to guide me through adding a Japan travel map to this blog."
