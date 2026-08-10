@@ -7,6 +7,13 @@
     <title>Japan Prefecture Map Editor</title>
     <style>
       :root {
+        --jpm-level-0: #252b35;
+        --jpm-level-0-stripe: #39404c;
+        --jpm-level-1: #ffe3d6;
+        --jpm-level-2: #ffc1a5;
+        --jpm-level-3: #ff9a6f;
+        --jpm-level-4: #f66f41;
+        --jpm-level-5: #c9461f;
         color-scheme: dark;
         font-family: Inter, ui-sans-serif, system-ui, sans-serif;
         background: #0c1016;
@@ -21,12 +28,55 @@
       .shell {
         width: min(1320px, calc(100% - 2rem));
         margin: 0 auto;
-        padding: 3rem 0 5rem;
+        padding: 3rem 0;
       }
 
-      header { max-width: 760px; margin-bottom: 2rem; }
-      h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.04em; }
-      header p { color: #a9b3c1; line-height: 1.7; }
+      .page-header { margin-bottom: 2rem; }
+      .header-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1.5rem; align-items: start; }
+      h1 { margin: 0; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.04em; line-height: 1; text-wrap: balance; }
+      .page-subtitle { margin: 0.75rem 0 0; color: #f7f8fa; font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 700; }
+      .page-description { max-width: 760px; margin: 1rem 0 0; color: #a9b3c1; line-height: 1.7; text-wrap: pretty; }
+
+      .header-actions { display: flex; gap: 0.65rem; align-items: center; }
+      .icon-link,
+      .locale-control {
+        min-height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 0.75rem;
+        background: #202733;
+        color: #fff;
+      }
+
+      .icon-link { display: grid; width: 44px; place-items: center; }
+      .icon-link:hover, .icon-link:focus-visible { border-color: #ff9a6f; }
+      .icon-link svg, .locale-control svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+
+      .locale-control {
+        display: grid;
+        grid-template-columns: 1.25rem auto;
+        gap: 0.4rem;
+        align-items: center;
+        padding-left: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .locale-control select {
+        width: auto;
+        min-width: 7.75rem;
+        border: 0;
+        background: transparent;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
 
       .workspace {
         display: grid;
@@ -44,7 +94,7 @@
 
       .controls { position: sticky; top: 1rem; }
       .field { display: grid; gap: 0.45rem; margin-bottom: 1rem; }
-      label { color: #a9b3c1; font-size: 0.78rem; font-weight: 700; }
+      label { color: #a9b3c1; font-size: 0.8rem; font-weight: 700; }
 
       select,
       button {
@@ -58,8 +108,101 @@
       select { width: 100%; padding: 0 0.75rem; }
       button { padding: 0 1rem; cursor: pointer; font-weight: 700; }
       button:hover, button:focus-visible { border-color: #ff9a6f; }
-      .actions { display: flex; gap: 0.65rem; margin-bottom: 1rem; }
+      button:disabled { cursor: wait; opacity: 0.55; }
       .primary { background: #f66f41; border-color: #f66f41; }
+
+      .mobile-editor { display: none; }
+      .mobile-editor h2,
+      .embed-guide h2 {
+        margin: 0 0 1rem;
+        color: #f7f8fa;
+        font-size: 0.9rem;
+      }
+
+      .mobile-fields { display: grid; gap: 0.75rem; }
+      .mobile-fields .field { margin: 0; }
+
+      .level-guide {
+        margin-bottom: 1rem;
+        padding: 1rem 0;
+        border-block: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .level-guide h2 {
+        margin: 0 0 0.75rem;
+        color: #f7f8fa;
+        font-size: 0.85rem;
+      }
+
+      .level-list {
+        display: grid;
+        gap: 0.55rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .level-item {
+        display: grid;
+        grid-template-columns: 1rem minmax(0, 1fr);
+        gap: 0.65rem;
+        align-items: start;
+      }
+
+      .level-swatch {
+        width: 1rem;
+        height: 1rem;
+        margin-top: 0.1rem;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 0.25rem;
+        background: var(--jpm-level-color);
+      }
+
+      .level-swatch[data-level='0'] {
+        background: repeating-linear-gradient(45deg, var(--jpm-level-0), var(--jpm-level-0) 4px, var(--jpm-level-0-stripe) 4px, var(--jpm-level-0-stripe) 8px);
+      }
+
+      .level-swatch[data-level='1'] { --jpm-level-color: var(--jpm-level-1); }
+      .level-swatch[data-level='2'] { --jpm-level-color: var(--jpm-level-2); }
+      .level-swatch[data-level='3'] { --jpm-level-color: var(--jpm-level-3); }
+      .level-swatch[data-level='4'] { --jpm-level-color: var(--jpm-level-4); }
+      .level-swatch[data-level='5'] { --jpm-level-color: var(--jpm-level-5); }
+
+      .level-copy { color: #a9b3c1; font-size: 0.8rem; line-height: 1.4; }
+      .level-copy strong { color: #f7f8fa; font-size: 0.8rem; }
+
+      .map-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0;
+      }
+
+      .map-actions button {
+        display: inline-flex;
+        gap: 0.45rem;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 0.75rem;
+      }
+
+      .button-icon {
+        width: 1rem;
+        height: 1rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+      }
+
+      .embed-guide {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .copy-action { margin-top: 0.75rem; }
+      .copy-action button { width: 100%; }
 
       pre {
         overflow: auto;
@@ -68,66 +211,135 @@
         border-radius: 0.75rem;
         background: #0c1016;
         color: #d7dee8;
-        font: 0.72rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+        font: 0.8rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
         white-space: pre-wrap;
         word-break: break-word;
       }
 
-      .hint, #copy-status { color: #a9b3c1; font-size: 0.75rem; line-height: 1.55; }
-      #copy-status { min-height: 1.2em; }
+      .hint, .status { color: #a9b3c1; font-size: 0.8rem; line-height: 1.55; }
+      .status { min-height: 1.2em; margin: 0.65rem 0 0; }
+
+      .site-footer {
+        width: min(1320px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 1.5rem 0 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #a9b3c1;
+        font-size: 0.78rem;
+        text-align: center;
+      }
+
+      .site-footer a { color: inherit; text-decoration: none; }
+      .site-footer a:hover, .site-footer a:focus-visible { color: #ff9a6f; }
 
       @media (max-width: 900px) {
+        .header-row { grid-template-columns: 1fr; }
+        .header-actions { grid-row: 1; justify-self: end; }
+        .brand { grid-row: 2; }
         .workspace { grid-template-columns: 1fr; }
+        .mobile-editor { display: block; }
         .controls { position: static; }
       }
     </style>
   </head>
   <body>
     <main class="shell">
-      <header>
-        <h1>Japan Prefecture Map Editor</h1>
-        <p>直接點擊地圖循環 Level 0–5，完成後複製設定。公開元件預設唯讀，編輯行為只存在這個工具頁。</p>
+      <header class="page-header">
+        <div class="header-row">
+          <div class="brand">
+            <h1 id="page-title">Japan Prefecture Map</h1>
+            <p id="page-subtitle" class="page-subtitle">基於 JapanEx 延伸的可嵌入都道府縣地圖</p>
+            <p id="page-description" class="page-description">點擊地圖設定 Level 0–5，完成後複製嵌入碼。</p>
+          </div>
+
+          <div class="header-actions">
+            <a id="github-link" class="icon-link" href="https://github.com/HeiTang/Japan-Prefecture-Map" rel="external noopener" aria-label="在 GitHub 查看原始碼" title="在 GitHub 查看原始碼">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.51-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.91-3.64-4.02 0-.89.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.38 7.38 0 0 1 8 3.91c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.12-1.87 3.81-3.65 4.02.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.47.55.39A8.15 8.15 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/></svg>
+            </a>
+
+            <label class="locale-control" for="locale">
+              <span id="locale-label" class="sr-only">語言</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.92 6h-3.06a15.7 15.7 0 0 0-1.38-3.56A8.04 8.04 0 0 1 18.92 8ZM12 4c.83 1.2 1.47 2.54 1.84 4h-3.68A13.7 13.7 0 0 1 12 4ZM4.26 14a7.8 7.8 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4h-3.4Zm.82 2h3.06c.3 1.27.77 2.47 1.38 3.56A8.04 8.04 0 0 1 5.08 16Zm3.06-8H5.08a8.04 8.04 0 0 1 4.44-3.56A15.7 15.7 0 0 0 8.14 8ZM12 20a13.7 13.7 0 0 1-1.84-4h3.68A13.7 13.7 0 0 1 12 20Zm2.27-6H9.73a14.7 14.7 0 0 1 0-4h4.54a14.7 14.7 0 0 1 0 4Zm.21 5.56A15.7 15.7 0 0 0 15.86 16h3.06a8.04 8.04 0 0 1-4.44 3.56ZM16.34 14a16.5 16.5 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4h-3.4Z"/></svg>
+              <select id="locale">
+                <option value="zh-TW">繁體中文</option>
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+          </div>
+        </div>
       </header>
 
       <div class="workspace">
-        <section aria-label="地圖預覽">
+        <section id="mobile-editor" class="panel mobile-editor" aria-labelledby="mobile-editor-title">
+          <h2 id="mobile-editor-title">精準設定</h2>
+          <div class="mobile-fields">
+            <div class="field">
+              <label id="prefecture-label" for="prefecture">都道府縣</label>
+              <select id="prefecture"></select>
+            </div>
+            <div class="field">
+              <label id="mobile-level-label" for="mobile-level">等級</label>
+              <select id="mobile-level"></select>
+            </div>
+          </div>
+        </section>
+
+        <section id="preview-section" aria-label="地圖預覽">
           <japan-prefecture-map id="preview" locale="zh-TW" theme="dark" levels="{}"></japan-prefecture-map>
         </section>
 
-        <aside class="panel controls" aria-label="編輯設定">
+        <aside id="controls" class="panel controls" aria-label="編輯設定">
           <div class="field">
-            <label for="locale">語系</label>
-            <select id="locale">
-              <option value="zh-TW">繁體中文</option>
-              <option value="ja">日本語</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="theme">主題</label>
+            <label id="theme-label" for="theme">地圖主題</label>
             <select id="theme">
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
-              <option value="auto">Auto</option>
+              <option id="theme-dark" value="dark">深色</option>
+              <option id="theme-light" value="light">淺色</option>
+              <option id="theme-auto" value="auto">跟隨系統</option>
             </select>
           </div>
 
-          <div class="actions">
-            <button id="copy" class="primary" type="button">複製嵌入碼</button>
-            <button id="reset" type="button">重設</button>
-          </div>
-          <p id="copy-status" role="status" aria-live="polite"></p>
+          <section class="level-guide" aria-labelledby="level-guide-title">
+            <h2 id="level-guide-title">等級說明</h2>
+            <ol id="level-list" class="level-list"></ol>
+          </section>
 
-          <p class="hint">先安裝並在你的 client entry 匯入：</p>
-          <pre><code>npm install japan-prefecture-map
+          <div class="map-actions">
+            <button id="reset" type="button">
+              <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v6h6" /></svg>
+              <span>重設</span>
+            </button>
+            <button id="export-image" type="button">
+              <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+              <span>下載 PNG</span>
+            </button>
+          </div>
+          <p id="map-action-status" class="status" role="status" aria-live="polite"></p>
+
+          <section class="embed-guide" aria-labelledby="embed-guide-title">
+            <h2 id="embed-guide-title">在網站中使用</h2>
+            <p id="install-hint" class="hint">先安裝套件，並在網站程式中匯入：</p>
+            <pre><code>npm install japan-prefecture-map
 
 import 'japan-prefecture-map';</code></pre>
-          <p class="hint">再貼入元件：</p>
-          <pre><code id="markup"></code></pre>
+            <p id="embed-hint" class="hint">再貼入產生的元件：</p>
+            <pre><code id="markup"></code></pre>
+            <div class="copy-action">
+              <button id="copy" class="primary" type="button">複製嵌入碼</button>
+            </div>
+            <p id="copy-status" class="status" role="status" aria-live="polite"></p>
+          </section>
         </aside>
       </div>
     </main>
+
+    <footer class="site-footer">
+      <a href="https://github.com/HeiTang" rel="external noopener">Copyright © 2026 HeiTang</a>
+      <span aria-hidden="true"> · </span>
+      <a id="footer-source" href="https://github.com/ukyouz/JapanEx" rel="external noopener">Based on JapanEx</a>
+      <span aria-hidden="true"> · </span>
+      <a href="https://github.com/HeiTang/Japan-Prefecture-Map/blob/main/LICENSE" rel="external noopener">MIT License</a>
+    </footer>
 
     <script type="module" src="./dist/editor.js"></script>
   </body>

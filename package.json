@@ -7,10 +7,10 @@
   "author": "HeiTang",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HeiTang/japan-prefecture-map.git"
+    "url": "git+https://github.com/HeiTang/Japan-Prefecture-Map.git"
   },
-  "homepage": "https://heitang.github.io/japan-prefecture-map/",
-  "bugs": "https://github.com/HeiTang/japan-prefecture-map/issues",
+  "homepage": "https://heitang.github.io/Japan-Prefecture-Map/",
+  "bugs": "https://github.com/HeiTang/Japan-Prefecture-Map/issues",
   "keywords": [
     "japan",
     "prefecture",
