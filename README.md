@@ -1,5 +1,7 @@
 # Japan Prefecture Map
 
+![Japan Prefecture Map：用地圖記錄你的日本旅程](https://raw.githubusercontent.com/HeiTang/Japan-Prefecture-Map/main/assets/japan-prefecture-map-preview.png)
+
 Japan Prefecture Map 是基於 [JapanEx](https://github.com/ukyouz/JapanEx) 地圖與制縣等級概念，重新製作成可嵌入任何網站的 Web Component。
 
 用一張地圖記錄你在日本 47 個都道府縣的旅行經驗。
@@ -13,6 +15,29 @@ Japan Prefecture Map 是基於 [JapanEx](https://github.com/ukyouz/JapanEx) 地�
 - 繁體中文、日文、英文
 - 明亮、暗黑和跟隨系統的主題
 - 不依賴帳號、資料庫或外部服務
+
+## 用線上編輯器產生你的地圖
+
+不必先手寫 47 個都道府縣的設定。線上編輯器可以直接完成設定並產生要貼進網站的內容。
+
+**[開啟 Japan Prefecture Map Editor →](https://heitang.github.io/Japan-Prefecture-Map/)**
+
+1. 選擇繁體中文、日文或英文
+2. 選擇明亮、暗黑或跟隨系統主題
+3. 點選都道府縣，設定各自的旅行等級
+4. 按下「複製嵌入碼」，取得完整的地圖元件
+
+編輯器會產生可以直接貼進網站的內容：
+
+```html
+<japan-prefecture-map
+  locale="zh-TW"
+  theme="auto"
+  levels='{"01":4,"13":4,"27":5}'
+></japan-prefecture-map>
+```
+
+貼上元件後，再依照下方方式載入套件即可顯示地圖。以後想修改，只要回到編輯器重新設定並替換這段內容。
 
 ## 快速開始
 
@@ -50,8 +75,6 @@ import 'japan-prefecture-map';
   </body>
 </html>
 ```
-
-> CDN 方式需要先把套件發布到 npm。專案內也有可直接操作的編輯器：執行 `npm run build` 和 `node scripts/server.mjs`，再開啟 <http://127.0.0.1:4173>。
 
 ## 使用方式
 
