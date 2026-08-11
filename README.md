@@ -20,7 +20,7 @@ Japan Prefecture Map 是基於 [JapanEx](https://github.com/ukyouz/JapanEx) 地�
 
 不必先手寫 47 個都道府縣的設定。線上編輯器可以直接完成設定並產生要貼進網站的內容。
 
-**[開啟 Japan Prefecture Map Editor →](https://heitang.github.io/Japan-Prefecture-Map/)**
+**[開啟 Japan Prefecture Map Editor →](https://japanmap.purr.tw/)**
 
 1. 選擇繁體中文、日文或英文
 2. 選擇明亮、暗黑或跟隨系統主題

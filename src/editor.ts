@@ -102,6 +102,10 @@ function required<T extends Element>(selector: string): T {
   return element;
 }
 
+function track(event: 'copy_embed_code' | 'download_png') {
+  (window as typeof window & { gtag?: (command: 'event', event: string) => void }).gtag?.('event', event);
+}
+
 const preview = required<JapanPrefectureMapElement>('#preview');
 const previewSection = required<HTMLElement>('#preview-section');
 const controls = required<HTMLElement>('#controls');
@@ -485,6 +489,7 @@ exportButton.addEventListener('click', async () => {
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(pngUrl), 0);
     mapActionStatus.textContent = copy.exported;
+    track('download_png');
   } catch {
     mapActionStatus.textContent = copy.exportError;
   } finally {
@@ -498,6 +503,7 @@ copyButton.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(markup.textContent ?? '');
     copyStatus.textContent = copy.copied;
+    track('copy_embed_code');
   } catch {
     copyStatus.textContent = copy.copyError;
   }

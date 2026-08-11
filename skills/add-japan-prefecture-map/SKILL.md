@@ -65,7 +65,7 @@ Skip this step when the user already supplied a complete valid `<japan-prefectur
 
 Open the Editor when browser control is available. Otherwise provide this link:
 
-<https://heitang.github.io/Japan-Prefecture-Map/>
+<https://japanmap.purr.tw/>
 
 Tell the user:
 

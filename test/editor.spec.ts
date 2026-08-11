@@ -47,19 +47,29 @@ test('renders, edits, resets, and reports invalid input', async ({ page }) => {
   await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('[role="alert"]')?.textContent)).toContain('Invalid levels');
 });
 
-test('downloads the current map as a PNG image', async ({ page }) => {
+test('tracks successful copy and PNG downloads', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.selectOption('#locale', 'zh-TW');
 
   await page.evaluate(() => {
-    const state = window as typeof window & { exportedSvg?: string };
+    const state = window as typeof window & {
+      analyticsEvents?: unknown[][];
+      exportedSvg?: string;
+      gtag?: (...args: unknown[]) => void;
+    };
+    state.analyticsEvents = [];
+    state.gtag = (...args) => state.analyticsEvents?.push(args);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => {} } });
     const createObjectURL = URL.createObjectURL.bind(URL);
     URL.createObjectURL = blob => {
       if (blob.type.startsWith('image/svg+xml')) void blob.text().then(text => { state.exportedSvg = text; });
       return createObjectURL(blob);
     };
   });
+
+  await page.click('#copy');
+  await expect(page.locator('#copy-status')).toHaveText('嵌入碼已複製');
 
   await page.selectOption('#prefecture', '13');
   await page.selectOption('#mobile-level', '1');
@@ -94,6 +104,10 @@ test('downloads the current map as a PNG image', async ({ page }) => {
   expect(png.length).toBeGreaterThan(50_000);
   expect(png.readUInt32BE(16)).toBe(1200);
   expect(png.readUInt32BE(20)).toBe(1500);
+
+  const analyticsEvents = await page.evaluate(() => (window as typeof window & { analyticsEvents?: unknown[][] }).analyticsEvents);
+  expect(analyticsEvents).toContainEqual(['event', 'copy_embed_code']);
+  expect(analyticsEvents).toContainEqual(['event', 'download_png']);
 });
 
 test('offers precise prefecture and level controls on mobile', async ({ page }) => {
