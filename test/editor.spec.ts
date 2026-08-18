@@ -122,6 +122,19 @@ test('offers precise prefecture and level controls on mobile', async ({ page }) 
 
   await expect(preview).toHaveAttribute('levels', '{"13":4}');
   await expect(page.locator('#markup')).toContainText('"13":4');
+
+  const clippedPrefectures = await preview.evaluate(element => {
+    const widget = element.shadowRoot?.querySelector('.widget')?.getBoundingClientRect();
+    if (!widget) return ['missing-widget'];
+
+    return [...(element.shadowRoot?.querySelectorAll('.prefecture') ?? [])]
+      .filter(prefecture => {
+        const bounds = prefecture.getBoundingClientRect();
+        return bounds.left < widget.left || bounds.right > widget.right;
+      })
+      .map(prefecture => prefecture.getAttribute('data-code'));
+  });
+  expect(clippedPrefectures).toEqual([]);
 });
 
 test('supports public properties and safe locale/theme fallbacks', async ({ page }) => {
@@ -139,4 +152,8 @@ test('supports public properties and safe locale/theme fallbacks', async ({ page
   await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.widget')?.getAttribute('lang'))).toBe('zh-TW');
   await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.widget')?.getAttribute('data-theme'))).toBe('auto');
   await expect(preview.locator('svg .prefecture[data-code="01"]')).toHaveAttribute('data-level', '4');
+  await expect.poll(() => preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.map-stage') ?? element).backgroundImage)).toContain('radial-gradient');
+
+  await preview.evaluate(element => element.style.setProperty('--jpm-map-glow', 'none'));
+  await expect.poll(() => preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.map-stage') ?? element).backgroundImage)).toBe('none');
 });

@@ -81,7 +81,37 @@ Accept the element with or without a Markdown code fence. Extract only:
 
 Reject malformed JSON, unsupported attributes that execute code, invalid prefecture codes, and invalid levels. Explain the exact field to correct and direct the user back to the Editor when regeneration is easier.
 
-### 5. Implement the integration
+### 5. Choose how the map fits the site
+
+Skip this question when the user already chose an appearance. Otherwise inspect the target page, recommend the best fit, and ask with these choices:
+
+1. Blend into the site — removes the card surfaces, border, and map glow.
+2. Transparent with glow — removes the card surfaces and border but keeps the map glow.
+3. Complete card — keeps the component's self-contained background, border, and glow.
+
+Recommend blending when the page already has a designed background or container. Recommend the complete card on a plain content surface. Put the recommendation first and explain the visible result without asking about CSS variables.
+
+Apply the selected appearance in the site's existing stylesheet:
+
+```css
+japan-prefecture-map {
+  --jpm-surface: transparent;
+  --jpm-surface-raised: transparent;
+  --jpm-border: transparent;
+  --jpm-map-glow: none;
+}
+```
+
+For transparent with glow, omit `--jpm-map-glow`. For the complete card, add no appearance overrides. Do not change `theme`; it controls the component colors, not whether it has a card background.
+
+When handing off appearance CSS, explain only the variables that were added:
+
+- `--jpm-surface` controls the main card background.
+- `--jpm-surface-raised` controls the score digits and legend button backgrounds.
+- `--jpm-border` controls the outer and small control borders.
+- `--jpm-map-glow` controls the glow behind the map; `none` disables it.
+
+### 6. Implement the integration
 
 - Use the site's existing page, layout, component, naming, and styling patterns.
 - Preserve the copied locale, theme, and levels even when framework syntax requires transforming the HTML.
@@ -90,24 +120,26 @@ Reject malformed JSON, unsupported attributes that execute code, invalid prefect
 - Add a page title or section heading by following the site's existing content style.
 - Do not add a framework, wrapper library, state store, or new configuration format for this integration.
 
-### 6. Verify
+### 7. Verify
 
 Run the repository's existing build or test command. When browser control is available, also open the resulting page and verify:
 
 - the custom element renders instead of remaining blank;
 - there are no console errors caused by the integration;
 - the selected locale, theme, and non-zero levels appear;
+- the selected card background and glow behavior match the user's choice;
 - the map fits desktop and mobile widths without horizontal overflow.
 
 If a required check cannot run, state exactly which part remains unverified. Do not describe a successful build as a successful deployment.
 
-### 7. Hand off
+### 8. Hand off
 
 Report:
 
 - files changed;
 - page URL or route;
 - installation method and pinned package version;
+- selected appearance: blended, transparent with glow, or complete card;
 - checks that passed;
 - how to change the map later: reopen the Editor, copy a new element, and replace the existing element settings;
 - any requested commit, push, or deployment as a separate next action.
