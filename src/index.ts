@@ -177,7 +177,7 @@ const styles = String.raw`
 
   .map-stage {
     padding: 0 clamp(0.25rem, 2vw, 1.5rem);
-    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%);
+    background: var(--jpm-map-glow, radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%));
   }
 
   .japan-map {
@@ -310,7 +310,6 @@ const styles = String.raw`
   @media (max-width: 560px) {
     .summary { align-items: start; flex-direction: column; }
     .stats { width: 100%; justify-content: space-between; }
-    .map-stage { margin-inline: -9%; }
     .legend-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
