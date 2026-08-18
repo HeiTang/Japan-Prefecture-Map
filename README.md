@@ -70,7 +70,7 @@ import 'japan-prefecture-map';
     <japan-prefecture-map levels='{"13":4,"27":5}'></japan-prefecture-map>
 
     <script type="module">
-      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.1.1/dist/index.js';
+      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.1.2/dist/index.js';
     </script>
   </body>
 </html>
