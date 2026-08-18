@@ -209,6 +209,35 @@ japan-prefecture-map {
 | `--jpm-map-glow` | 地圖後方的中央光暈；設為 `none` 即可關閉 |
 | `--jpm-map-font` | 地圖上都道府縣名稱的字型 |
 
+### 隱藏或改寫內建區塊
+
+元件的每個區塊都標上了 `part`，可以從外部用 [`::part()`](https://developer.mozilla.org/docs/Web/CSS/::part) 直接改樣式：
+
+| part | 對應區塊 |
+| --- | --- |
+| `widget` | 整張卡片 |
+| `summary` | 上方的分數與統計列 |
+| `score` | 分數的翻牌數字 |
+| `stats` | 已踏足／住宿以上／居住三個數字 |
+| `map` | 地圖本身 |
+| `legend` | 下方的 0–5 分級 |
+
+如果頁面上已經有自己的標題與統計，只想留地圖：
+
+```css
+japan-prefecture-map::part(summary),
+japan-prefecture-map::part(legend) {
+  display: none;
+}
+
+japan-prefecture-map::part(widget) {
+  border: 0;
+  background: none;
+}
+```
+
+`::part()` 只能改樣式，不能改變區塊的順序或內容；也無法選取區塊內部的元素（例如 `::part(summary) .score` 無效），所以需要單獨控制的區塊都已經各自標好 part。
+
 可調整的變數包括 `--jpm-surface`、`--jpm-surface-raised`、`--jpm-map-glow`、`--jpm-map-font`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
 
 ## 專案範圍

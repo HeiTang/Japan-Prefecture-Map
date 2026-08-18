@@ -329,14 +329,14 @@ export class JapanPrefectureMapElement extends HTMLElement {
       const levels = this.#readLevels();
       const stats = getJapanStats(levels);
 
-      this.#root.innerHTML = `<style>${styles}</style><section class="widget" data-theme="${theme}" lang="${locale}" aria-label="${copy.title}"><header class="summary"><div><span class="score-label">${copy.score}</span><div class="score" data-score="${stats.score}" aria-label="${copy.score} ${stats.score}">${digitsFor(stats.score)}</div></div><dl class="stats"><div class="stat"><dt>${copy.visited}</dt><dd>${stats.visited}<small> / ${stats.total}</small></dd></div><div class="stat"><dt>${copy.stayed}</dt><dd>${stats.stayed}</dd></div><div class="stat"><dt>${copy.lived}</dt><dd>${stats.lived}</dd></div></dl></header><div class="map-stage">${renderMap(levels, locale)}</div><details class="legend"><summary>${copy.legend}</summary><ol class="legend-list">${legendFor(locale)}</ol><p class="method">${copy.method}</p><p class="credit">${copy.source}: <a href="https://github.com/ukyouz/JapanEx" rel="external noopener">JapanEx</a> · MIT</p></details></section>`;
+      this.#root.innerHTML = `<style>${styles}</style><section class="widget" part="widget" data-theme="${theme}" lang="${locale}" aria-label="${copy.title}"><header class="summary" part="summary"><div><span class="score-label">${copy.score}</span><div class="score" part="score" data-score="${stats.score}" aria-label="${copy.score} ${stats.score}">${digitsFor(stats.score)}</div></div><dl class="stats" part="stats"><div class="stat"><dt>${copy.visited}</dt><dd>${stats.visited}<small> / ${stats.total}</small></dd></div><div class="stat"><dt>${copy.stayed}</dt><dd>${stats.stayed}</dd></div><div class="stat"><dt>${copy.lived}</dt><dd>${stats.lived}</dd></div></dl></header><div class="map-stage" part="map">${renderMap(levels, locale)}</div><details class="legend" part="legend"><summary>${copy.legend}</summary><ol class="legend-list">${legendFor(locale)}</ol><p class="method">${copy.method}</p><p class="credit">${copy.source}: <a href="https://github.com/ukyouz/JapanEx" rel="external noopener">JapanEx</a> · MIT</p></details></section>`;
 
       if (!this.#animated && stats.score > 0) {
         this.#animated = true;
         requestAnimationFrame(() => void this.#animateScore());
       }
     } catch {
-      this.#root.innerHTML = `<style>${styles}</style><section class="widget" data-theme="${theme}" lang="${locale}" role="alert"><p class="error">${copy.error}</p></section>`;
+      this.#root.innerHTML = `<style>${styles}</style><section class="widget" part="widget" data-theme="${theme}" lang="${locale}" role="alert"><p class="error">${copy.error}</p></section>`;
     }
   }
 
