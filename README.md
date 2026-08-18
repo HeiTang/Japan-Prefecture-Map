@@ -159,7 +159,25 @@ japan-prefecture-map {
 }
 ```
 
-可調整的變數包括 `--jpm-surface`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
+如果不需要內建卡片背景，讓地圖直接融入網站：
+
+```css
+japan-prefecture-map {
+  --jpm-surface: transparent;
+  --jpm-surface-raised: transparent;
+  --jpm-border: transparent;
+  --jpm-map-glow: none;
+}
+```
+
+| 變數 | 控制內容 |
+| --- | --- |
+| `--jpm-surface` | 整張元件卡片的主要背景 |
+| `--jpm-surface-raised` | 分數數字與圖例按鈕等凸起區塊的背景 |
+| `--jpm-border` | 元件外框、分數數字、圖例按鈕與色塊的邊框 |
+| `--jpm-map-glow` | 地圖後方的中央光暈；設為 `none` 即可關閉 |
+
+可調整的變數包括 `--jpm-surface`、`--jpm-surface-raised`、`--jpm-map-glow`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
 
 ## 專案範圍
 

@@ -139,4 +139,8 @@ test('supports public properties and safe locale/theme fallbacks', async ({ page
   await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.widget')?.getAttribute('lang'))).toBe('zh-TW');
   await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.widget')?.getAttribute('data-theme'))).toBe('auto');
   await expect(preview.locator('svg .prefecture[data-code="01"]')).toHaveAttribute('data-level', '4');
+  await expect.poll(() => preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.map-stage') ?? element).backgroundImage)).toContain('radial-gradient');
+
+  await preview.evaluate(element => element.style.setProperty('--jpm-map-glow', 'none'));
+  await expect.poll(() => preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.map-stage') ?? element).backgroundImage)).toBe('none');
 });

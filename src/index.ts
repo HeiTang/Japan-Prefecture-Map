@@ -177,7 +177,7 @@ const styles = String.raw`
 
   .map-stage {
     padding: 0 clamp(0.25rem, 2vw, 1.5rem);
-    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%);
+    background: var(--jpm-map-glow, radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%));
   }
 
   .japan-map {
