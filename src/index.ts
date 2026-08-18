@@ -10,7 +10,7 @@ import {
   type JapanMapTheme,
   type PrefectureLevels,
 } from './model.js';
-import { renderMap } from './render.js';
+import { mapStyles, renderMap } from './render.js';
 
 export type {
   JapanMapLocale,
@@ -180,64 +180,7 @@ const styles = String.raw`
     background: var(--jpm-map-glow, radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%));
   }
 
-  .japan-map {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .level-zero { fill: var(--level-0); }
-  .level-zero-stripe { fill: var(--level-0-stripe); }
-
-  .prefecture {
-    fill: url('#jpm-unvisited-pattern');
-    pointer-events: none;
-  }
-
-  .japan-map[data-interactive='true'] .prefecture {
-    cursor: pointer;
-    pointer-events: auto;
-  }
-
-  .japan-map[data-interactive='true'] .prefecture:hover,
-  .japan-map[data-interactive='true'] .prefecture:focus-visible {
-    filter: brightness(1.16);
-    outline: none;
-  }
-
-  .prefecture[data-level='1'] { fill: var(--level-1); }
-  .prefecture[data-level='2'] { fill: var(--level-2); }
-  .prefecture[data-level='3'] { fill: var(--level-3); }
-  .prefecture[data-level='4'] { fill: var(--level-4); }
-  .prefecture[data-level='5'] { fill: var(--level-5); }
-
-  .prefecture > polygon,
-  .prefecture > rect {
-    fill: inherit;
-    stroke: #202832;
-    stroke-width: 2;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .map-label {
-    fill: #fff;
-    stroke: #202832;
-    stroke-width: 2px;
-    paint-order: stroke;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    font-family: ui-sans-serif, system-ui, sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    pointer-events: none;
-  }
-
-  .japan-map[data-locale='en'] .map-label { font-size: 11px; }
-  .small-label { font-size: 14px; }
-  .japan-map[data-locale='en'] .small-label { font-size: 9px; }
-  .vertical-label { writing-mode: vertical-rl; }
+${mapStyles}
 
   .legend {
     margin: 0;

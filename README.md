@@ -157,6 +157,25 @@ getJapanStats({ '01': 4, '13': 4, '27': 5 });
 
 `japan-prefecture-map/data` 不會碰瀏覽器畫面，適合在 Astro 等伺服器端先產生標題、摘要或結構化資料。
 
+### 在伺服器端直接輸出地圖
+
+如果你的網站是 Astro、Next.js 這類會先產生 HTML 的框架，可以不載入 Web Component，改成在建置時就把地圖畫進 HTML：
+
+```astro
+---
+import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 };
+---
+
+<div set:html={renderMap(levels, 'zh-TW')} />
+<style is:inline set:html={mapStyles}></style>
+```
+
+這條路徑不需要瀏覽器，也不會載入任何前端 JavaScript：地圖直接在 HTML 裡，搜尋引擎與站內搜尋可以讀到 47 個都道府縣的名稱與等級。代價是沒有 Web Component 附帶的分數、統計與圖例，這些要自己排版（`getJapanStats` 會給你需要的數字）。
+
+`mapStyles` 讀的是同一組 `--jpm-level-*` 變數，所以配色調整方式跟 Web Component 一樣。
+
 ## 外觀與相容性
 
 ### 外觀調整
@@ -188,8 +207,9 @@ japan-prefecture-map {
 | `--jpm-surface-raised` | 分數數字與圖例按鈕等凸起區塊的背景 |
 | `--jpm-border` | 元件外框、分數數字、圖例按鈕與色塊的邊框 |
 | `--jpm-map-glow` | 地圖後方的中央光暈；設為 `none` 即可關閉 |
+| `--jpm-map-font` | 地圖上都道府縣名稱的字型 |
 
-可調整的變數包括 `--jpm-surface`、`--jpm-surface-raised`、`--jpm-map-glow`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
+可調整的變數包括 `--jpm-surface`、`--jpm-surface-raised`、`--jpm-map-glow`、`--jpm-map-font`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
 
 ## 專案範圍
 

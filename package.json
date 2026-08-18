@@ -40,6 +40,10 @@
     "./data": {
       "types": "./dist/data.d.ts",
       "import": "./dist/data.js"
+    },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.js"
     }
   },
   "scripts": {
