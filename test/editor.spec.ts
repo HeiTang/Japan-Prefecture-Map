@@ -122,6 +122,19 @@ test('offers precise prefecture and level controls on mobile', async ({ page }) 
 
   await expect(preview).toHaveAttribute('levels', '{"13":4}');
   await expect(page.locator('#markup')).toContainText('"13":4');
+
+  const clippedPrefectures = await preview.evaluate(element => {
+    const widget = element.shadowRoot?.querySelector('.widget')?.getBoundingClientRect();
+    if (!widget) return ['missing-widget'];
+
+    return [...(element.shadowRoot?.querySelectorAll('.prefecture') ?? [])]
+      .filter(prefecture => {
+        const bounds = prefecture.getBoundingClientRect();
+        return bounds.left < widget.left || bounds.right > widget.right;
+      })
+      .map(prefecture => prefecture.getAttribute('data-code'));
+  });
+  expect(clippedPrefectures).toEqual([]);
 });
 
 test('supports public properties and safe locale/theme fallbacks', async ({ page }) => {

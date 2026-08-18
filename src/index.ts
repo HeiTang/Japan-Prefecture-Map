@@ -310,7 +310,6 @@ const styles = String.raw`
   @media (max-width: 560px) {
     .summary { align-items: start; flex-direction: column; }
     .stats { width: 100%; justify-content: space-between; }
-    .map-stage { margin-inline: -9%; }
     .legend-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
