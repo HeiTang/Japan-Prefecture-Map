@@ -39,6 +39,18 @@ Japan Prefecture Map 是基於 [JapanEx](https://github.com/ukyouz/JapanEx) 地�
 
 貼上元件後，再依照下方方式載入套件即可顯示地圖。以後想修改，只要回到編輯器重新設定並替換這段內容。
 
+## 讓 AI 協助加入網站
+
+即使沒有下載這個專案，也可以把以下提示貼給支援 Skills 的 AI：
+
+```text
+請使用這個 Skill，協助我把 Japan Prefecture Map 加入目前的網站：
+
+https://github.com/HeiTang/Japan-Prefecture-Map/tree/main/skills/add-japan-prefecture-map
+```
+
+Skill 會檢查你的網站環境，並引導你完成安裝、地圖設定與外觀調整。
+
 ## 快速開始
 
 ### 有 Vite、Astro 或其他前端專案
