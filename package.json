@@ -1,6 +1,6 @@
 {
   "name": "japan-prefecture-map",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A dependency-free Web Component for visualizing Japan prefecture travel levels.",
   "type": "module",
   "license": "MIT",
@@ -40,6 +40,10 @@
     "./data": {
       "types": "./dist/data.d.ts",
       "import": "./dist/data.js"
+    },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.js"
     }
   },
   "scripts": {

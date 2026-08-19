@@ -82,7 +82,7 @@ import 'japan-prefecture-map';
     <japan-prefecture-map levels='{"13":4,"27":5}'></japan-prefecture-map>
 
     <script type="module">
-      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.1.2/dist/index.js';
+      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.2.0/dist/index.js';
     </script>
   </body>
 </html>
@@ -157,11 +157,55 @@ getJapanStats({ '01': 4, '13': 4, '27': 5 });
 
 `japan-prefecture-map/data` 不會碰瀏覽器畫面，適合在 Astro 等伺服器端先產生標題、摘要或結構化資料。
 
+### 在伺服器端直接輸出地圖
+
+如果你的網站是 Astro、Next.js 這類會先產生 HTML 的框架，可以不載入 Web Component，改成在建置時就把地圖畫進 HTML：
+
+```astro
+---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
+---
+
+<div set:html={renderMap(levels, 'zh-TW')} />
+<style is:inline set:html={mapStyles}></style>
+```
+
+這條路徑不需要瀏覽器，也不會載入任何前端 JavaScript：地圖直接在 HTML 裡，搜尋引擎與站內搜尋可以讀到 47 個都道府縣的名稱與等級。代價是沒有 Web Component 附帶的分數、統計與圖例，這些要自己排版（`getJapanStats` 會給你需要的數字）。
+
+`mapStyles` 讀的是同一組 `--jpm-level-*` 變數，所以配色調整方式跟 Web Component 一樣。
+
 ## 外觀與相容性
 
-### 外觀調整
+### 外觀變數完整對照
 
-只覆寫需要的顏色即可：
+所有對外樣式都使用 `--jpm-*`；不要覆寫內部的 `--theme-*`。使用 Web Component 時，把變數放在 `japan-prefecture-map`；使用 SSR SVG 時，把可用變數放在包住 `.japan-map` 的容器或 `:root`。
+
+| 類別 | 變數 | 預設值 | 控制內容 | 適用路徑 |
+| --- | --- | --- | --- | --- |
+| 卡片 | `--jpm-surface` | 深色 `#11151c`；淺色 `#f7f4ef` | 元件卡片主背景 | Web Component |
+| 卡片 | `--jpm-surface-raised` | 深色 `#1b212b`；淺色 `#fff` | 分數數字、圖例按鈕等凸起區塊背景 | Web Component |
+| 文字 | `--jpm-text` | 深色 `#f7f8fa`；淺色 `#20252d` | 元件主要文字 | Web Component |
+| 文字 | `--jpm-muted` | 深色 `#9aa5b4`；淺色 `#626c79` | 分數標籤、統計標籤等次要文字 | Web Component |
+| 邊框 | `--jpm-border` | 深色 `rgba(255, 255, 255, 0.1)`；淺色 `rgba(32, 37, 45, 0.14)` | 卡片、分數數字、圖例按鈕與色塊邊框 | Web Component |
+| 強調色 | `--jpm-accent` | `#ff8c61` | 分數數字與預設地圖光暈的基準色 | Web Component |
+| 地圖 | `--jpm-map-glow` | 以 `--jpm-accent` 產生的中央 radial glow | 地圖後方光暈；設為 `none` 關閉 | Web Component |
+| 地圖 | `--jpm-map-font` | `ui-sans-serif, system-ui, sans-serif` | 都道府縣名稱字型 | Web Component、SSR SVG |
+| 等級 0 | `--jpm-level-0` | `#252b35` | 未去過區域的底色 | Web Component、SSR SVG |
+| 等級 0 | `--jpm-level-0-stripe` | `#39404c` | 未去過區域的斜線色 | Web Component、SSR SVG |
+| 等級 1 | `--jpm-level-1` | `#ffe3d6` | 等級 1 區域色 | Web Component、SSR SVG |
+| 等級 2 | `--jpm-level-2` | `#ffc1a5` | 等級 2 區域色 | Web Component、SSR SVG |
+| 等級 3 | `--jpm-level-3` | `#ff9a6f` | 等級 3 區域色 | Web Component、SSR SVG |
+| 等級 4 | `--jpm-level-4` | `#f66f41` | 等級 4 區域色 | Web Component、SSR SVG |
+| 等級 5 | `--jpm-level-5` | `#c9461f` | 等級 5 區域色 | Web Component、SSR SVG |
+
+`theme="auto"` 依系統設定使用深色或淺色預設值；只有表中標示「Web Component、SSR SVG」的變數會影響 `renderMap()` 輸出的地圖。
+
+### 常見覆寫
+
+#### Web Component：調整地圖配色
 
 ```css
 japan-prefecture-map {
@@ -171,7 +215,7 @@ japan-prefecture-map {
 }
 ```
 
-如果不需要內建卡片背景，讓地圖直接融入網站：
+#### Web Component：讓地圖融入既有版面
 
 ```css
 japan-prefecture-map {
@@ -182,14 +226,36 @@ japan-prefecture-map {
 }
 ```
 
-| 變數 | 控制內容 |
-| --- | --- |
-| `--jpm-surface` | 整張元件卡片的主要背景 |
-| `--jpm-surface-raised` | 分數數字與圖例按鈕等凸起區塊的背景 |
-| `--jpm-border` | 元件外框、分數數字、圖例按鈕與色塊的邊框 |
-| `--jpm-map-glow` | 地圖後方的中央光暈；設為 `none` 即可關閉 |
+### Web Component：用 `part` 隱藏或改寫內建區塊
 
-可調整的變數包括 `--jpm-surface`、`--jpm-surface-raised`、`--jpm-map-glow`、`--jpm-text`、`--jpm-muted`、`--jpm-border`、`--jpm-accent`，以及 `--jpm-level-0` 到 `--jpm-level-5`。
+這是 Web Component 的公開 `part` API：元件 Shadow DOM 裡的每個可客製區塊都標上名稱，外部可用 [`::part()`](https://developer.mozilla.org/docs/Web/CSS/::part) 改樣式。
+
+SSR 的 `renderMap()` 只輸出 SVG，沒有 Shadow DOM 或 `part`，因此不能使用 `::part()`；請直接對 `.japan-map` 或外層容器寫一般 CSS。
+
+| `part` 名稱 | 對應區塊 |
+| --- | --- |
+| `widget` | 整張卡片 |
+| `summary` | 上方的分數與統計列 |
+| `score` | 分數的翻牌數字 |
+| `stats` | 已踏足／住宿以上／居住三個數字 |
+| `map` | 地圖本身 |
+| `legend` | 下方的 0–5 分級 |
+
+如果頁面上已經有自己的標題與統計，只想留地圖：
+
+```css
+japan-prefecture-map::part(summary),
+japan-prefecture-map::part(legend) {
+  display: none;
+}
+
+japan-prefecture-map::part(widget) {
+  border: 0;
+  background: none;
+}
+```
+
+`::part()` 只能改樣式，不能改變區塊的順序或內容；也無法選取區塊內部的元素（例如 `::part(summary) .score` 無效），所以需要單獨控制的區塊都已經各自標好 part。
 
 ## 專案範圍
 

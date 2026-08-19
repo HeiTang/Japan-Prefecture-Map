@@ -1,6 +1,6 @@
 ---
 name: add-japan-prefecture-map
-description: Guide users through adding Japan Prefecture Map to an existing blog or website. Use when asked to install, embed, integrate, or configure japan-prefecture-map in Astro, Next.js, Vite, Hugo, Jekyll, or plain HTML. Inspect the project, offer guided choices, send the user to the official Editor to generate locale, theme, and levels, consume the copied Web Component markup, implement the smallest compatible integration, and verify the result.
+description: Guide users through adding Japan Prefecture Map to an existing blog or website. Use when asked to install, embed, integrate, or configure japan-prefecture-map in Astro, Next.js, Vite, Hugo, Jekyll, or plain HTML. Inspect the project, offer guided choices, use the official Editor to collect locale, theme, and levels, then implement either the interactive Web Component or DOM-free server-rendered SVG as appropriate and verify the result.
 ---
 
 # Add Japan Prefecture Map
@@ -52,7 +52,7 @@ If the user chooses an existing page, ask them to name it only when it cannot be
 
 Select automatically when the answer is clear:
 
-- Use npm with the existing package manager for a project that already bundles client-side JavaScript.
+- Use npm with the existing package manager for Astro, Next.js, or a project that already bundles client-side JavaScript.
 - Use a version-pinned jsDelivr URL for plain HTML or a static template without a client bundler.
 
 Ask only when both approaches are equally suitable. Recommend npm when a package manager already exists.
@@ -81,7 +81,18 @@ Accept the element with or without a Markdown code fence. Extract only:
 
 Reject malformed JSON, unsupported attributes that execute code, invalid prefecture codes, and invalid levels. Explain the exact field to correct and direct the user back to the Editor when regeneration is easier.
 
-### 5. Choose how the map fits the site
+### 5. Choose the rendering path
+
+Select automatically when the request makes the answer clear:
+
+1. Web Component (Recommended) — keeps the score, statistics, expandable legend, and Editor-generated embed element. Load it only in the browser.
+2. Server-rendered SVG — emits just the accessible map HTML with no client JavaScript. Use it when the user explicitly requests static HTML, no hydration, or only the map. It does not include the card, score, statistics, legend, or `theme` behavior.
+
+Ask only when both paths fit. Do not make a user who only wants a map choose framework terminology.
+
+### 6. Choose how the map fits the site
+
+Skip this step for server-rendered SVG. It has no card surface, glow, or `theme` styling; use the host site's `--jpm-level-*` variables only when map colours need adjustment.
 
 Skip this question when the user already chose an appearance. Otherwise inspect the target page, recommend the best fit, and ask with these choices:
 
@@ -111,18 +122,32 @@ When handing off appearance CSS, explain only the variables that were added:
 - `--jpm-border` controls the outer and small control borders.
 - `--jpm-map-glow` controls the glow behind the map; `none` disables it.
 
-### 6. Implement the integration
+When the page already renders its own score or statistics, keep only the needed Web Component blocks through public parts:
+
+```css
+japan-prefecture-map::part(summary),
+japan-prefecture-map::part(legend) {
+  display: none;
+}
+```
+
+Available parts are `widget`, `summary`, `score`, `stats`, `map`, and `legend`. Use them only for the Web Component path; server-rendered SVG has no Shadow DOM or parts.
+
+### 7. Implement the integration
 
 - Use the site's existing page, layout, component, naming, and styling patterns.
-- Preserve the copied locale, theme, and levels even when framework syntax requires transforming the HTML.
-- Load the package only in the browser. The package defines a custom element and must not be imported during server rendering.
+- Preserve the copied `locale` and `levels`. For server-rendered SVG, `theme` has no runtime effect; use the host stylesheet for map colours when needed.
+- For the Web Component path, load the root `japan-prefecture-map` entrypoint only in the browser and preserve the Editor-generated element.
+- For the server-rendered SVG path, import only `mapStyles` and `renderMap` from `japan-prefecture-map/render` in server code. Include `mapStyles` once and do not import the root entrypoint or emit client JavaScript.
 - Keep the map in a readable-width content area. Avoid narrow sidebars unless the user explicitly requests one.
 - Add a page title or section heading by following the site's existing content style.
 - Do not add a framework, wrapper library, state store, or new configuration format for this integration.
 
-### 7. Verify
+### 8. Verify
 
-Run the repository's existing build or test command. When browser control is available, also open the resulting page and verify:
+Run the repository's existing build or test command.
+
+For the Web Component path, when browser control is available, verify:
 
 - the custom element renders instead of remaining blank;
 - there are no console errors caused by the integration;
@@ -130,16 +155,24 @@ Run the repository's existing build or test command. When browser control is ava
 - the selected card background and glow behavior match the user's choice;
 - the map fits desktop and mobile widths without horizontal overflow.
 
+For the server-rendered SVG path, verify:
+
+- the generated page contains one visible `.japan-map` SVG and the selected locale and non-zero levels;
+- `mapStyles` is present once and the SVG has its intended level colours and labels;
+- the root Web Component entrypoint is not imported or hydrated;
+- the map fits desktop and mobile widths without horizontal overflow.
+
 If a required check cannot run, state exactly which part remains unverified. Do not describe a successful build as a successful deployment.
 
-### 8. Hand off
+### 9. Hand off
 
 Report:
 
 - files changed;
 - page URL or route;
 - installation method and pinned package version;
-- selected appearance: blended, transparent with glow, or complete card;
+- rendering path: Web Component or server-rendered SVG;
+- selected appearance: blended, transparent with glow, or complete card, when using the Web Component;
 - checks that passed;
-- how to change the map later: reopen the Editor, copy a new element, and replace the existing element settings;
+- how to change the map later: reopen the Editor, then replace the element settings or the validated `renderMap()` locale and levels;
 - any requested commit, push, or deployment as a separate next action.
