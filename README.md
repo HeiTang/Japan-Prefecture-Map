@@ -82,7 +82,7 @@ import 'japan-prefecture-map';
     <japan-prefecture-map levels='{"13":4,"27":5}'></japan-prefecture-map>
 
     <script type="module">
-      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.1.3/dist/index.js';
+      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.2.0/dist/index.js';
     </script>
   </body>
 </html>
@@ -163,9 +163,10 @@ getJapanStats({ '01': 4, '13': 4, '27': 5 });
 
 ```astro
 ---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
 import { mapStyles, renderMap } from 'japan-prefecture-map/render';
 
-const levels = { '01': 4, '13': 4, '27': 5 };
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
 ---
 
 <div set:html={renderMap(levels, 'zh-TW')} />
