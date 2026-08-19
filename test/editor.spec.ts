@@ -157,3 +157,19 @@ test('supports public properties and safe locale/theme fallbacks', async ({ page
   await preview.evaluate(element => element.style.setProperty('--jpm-map-glow', 'none'));
   await expect.poll(() => preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.map-stage') ?? element).backgroundImage)).toBe('none');
 });
+
+test('exposes every block through ::part for outside styling', async ({ page }) => {
+  await page.goto('/');
+  const preview = page.locator('japan-prefecture-map');
+
+  const parts = await preview.evaluate(element =>
+    [...(element.shadowRoot?.querySelectorAll('[part]') ?? [])].map(node => node.getAttribute('part')),
+  );
+
+  expect(parts).toEqual(['widget', 'summary', 'score', 'stats', 'map', 'legend']);
+
+  await page.addStyleTag({ content: 'japan-prefecture-map::part(summary) { display: none }' });
+  await expect.poll(() =>
+    preview.evaluate(element => getComputedStyle(element.shadowRoot?.querySelector('.summary') as Element).display),
+  ).toBe('none');
+});
