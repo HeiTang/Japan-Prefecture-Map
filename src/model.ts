@@ -96,7 +96,6 @@ export const uiCopy = {
     legend: '0–5 分級',
     method: '同一都道府縣只記最高等級。',
     error: 'levels 設定無效，請確認都道府縣代碼與等級。',
-    source: '地圖來源',
   },
   ja: {
     title: '日本47都道府県 制県レベルマップ',
@@ -108,7 +107,6 @@ export const uiCopy = {
     legend: 'レベル 0–5',
     method: '各都道府県は最高レベルのみ記録します。',
     error: 'levels の設定が無効です。都道府県コードとレベルを確認してください。',
-    source: '地図出典',
   },
   en: {
     title: 'Japan 47 Prefecture Travel Map',
@@ -120,7 +118,6 @@ export const uiCopy = {
     legend: 'Levels 0–5',
     method: 'Only the highest level is recorded for each prefecture.',
     error: 'Invalid levels. Check the prefecture codes and level values.',
-    source: 'Map source',
   },
 } as const;
 

@@ -17,9 +17,19 @@ test('renders, edits, resets, and reports invalid input', async ({ page }) => {
   await expect(preview).toHaveAttribute('levels', '{"01":1}');
   await expect(page.locator('#markup')).toContainText('"01":1');
 
-  for (const locale of ['zh-TW', 'ja', 'en']) {
+  const methods = [
+    ['zh-TW', '同一都道府縣只記最高等級。', '不想載入前端 JavaScript？使用 SSR SVG（Astro）'],
+    ['ja', '各都道府県は最高レベルのみ記録します。', 'フロントエンド JavaScript なしで使う：SSR SVG（Astro）'],
+    ['en', 'Only the highest level is recorded for each prefecture.', 'Need SVG without client-side JavaScript? Use SSR SVG (Astro)'],
+  ] as const;
+  for (const [locale, method, ssrSummary] of methods) {
     await page.selectOption('#locale', locale);
     await expect(page.locator('.site-footer')).toHaveText('Copyright © 2026 HeiTang · Based on JapanEx · MIT License');
+    await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.method')?.textContent)).toBe(method);
+    await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.credit')?.textContent)).toBe('Made by HeiTang · Map geometry based on JapanEx (MIT)');
+    await expect.poll(() => preview.evaluate(element => element.shadowRoot?.querySelector('.credit a[href="https://github.com/HeiTang"]')?.getAttribute('href'))).toBe('https://github.com/HeiTang');
+    await expect(page.locator('#ssr-summary')).toHaveText(ssrSummary);
+    await expect(page.locator('#ssr-markup')).toContainText(`renderMap(levels, '${locale}')`);
   }
   await page.selectOption('#theme', 'light');
   await expect(preview).toHaveAttribute('locale', 'en');
@@ -29,6 +39,7 @@ test('renders, edits, resets, and reports invalid input', async ({ page }) => {
   await expect(page.locator('#locale-label')).toHaveText('Language');
   await expect(page.locator('#theme-label')).toHaveText('Map theme');
   await expect(page.locator('#level-list')).toContainText('Never visited');
+  await expect(page.locator('#copy-ssr')).toHaveText('Copy Astro SSR code');
   await expect(page.locator('#reset')).toHaveText('Reset');
   await expect(page.locator('#export-image')).toHaveText('Download PNG');
   await expect(page.locator('#github-link')).toHaveAttribute('href', 'https://github.com/HeiTang/Japan-Prefecture-Map');
@@ -55,12 +66,14 @@ test('tracks successful copy and PNG downloads', async ({ page }) => {
   await page.evaluate(() => {
     const state = window as typeof window & {
       analyticsEvents?: unknown[][];
+      clipboardWrites?: string[];
       exportedSvg?: string;
       gtag?: (...args: unknown[]) => void;
     };
     state.analyticsEvents = [];
+    state.clipboardWrites = [];
     state.gtag = (...args) => state.analyticsEvents?.push(args);
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => {} } });
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text: string) => state.clipboardWrites?.push(text) } });
     const createObjectURL = URL.createObjectURL.bind(URL);
     URL.createObjectURL = blob => {
       if (blob.type.startsWith('image/svg+xml')) void blob.text().then(text => { state.exportedSvg = text; });
@@ -75,6 +88,17 @@ test('tracks successful copy and PNG downloads', async ({ page }) => {
   await page.selectOption('#mobile-level', '1');
   await page.selectOption('#prefecture', '27');
   await page.selectOption('#mobile-level', '1');
+
+  await page.click('#ssr-summary');
+  await expect(page.locator('#ssr-guide')).toHaveAttribute('open', '');
+  await page.click('#copy-ssr');
+  await expect(page.locator('#ssr-copy-status')).toHaveText('Astro SSR 程式碼已複製');
+  const ssrCode = await page.evaluate(() => (window as typeof window & { clipboardWrites?: string[] }).clipboardWrites?.at(-1) ?? '');
+  expect(ssrCode).toContain("import type { PrefectureLevels } from 'japan-prefecture-map/data';");
+  expect(ssrCode).toContain('const levels = {"13":1,"27":1} satisfies PrefectureLevels;');
+  expect(ssrCode).toContain("renderMap(levels, 'zh-TW')");
+  expect(ssrCode).toContain('Made by <a href="https://github.com/HeiTang">HeiTang</a>');
+  expect(ssrCode).not.toContain('theme=');
 
   const downloadPromise = page.waitForEvent('download');
   await page.click('#export-image');
