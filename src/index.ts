@@ -239,9 +239,23 @@ ${mapStyles}
   .legend-item small,
   .method,
   .credit { color: var(--muted); font-size: 0.72rem; line-height: 1.5; }
-  .method { margin: 1rem 0 0; }
-  .credit { margin: 0.35rem 0 0; }
-  .credit a { color: var(--accent); }
+  .legend-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    align-items: baseline;
+    margin: 1rem 0 0;
+  }
+  .method,
+  .credit { margin: 0; }
+  .credit { margin-inline-start: auto; text-align: end; white-space: nowrap; }
+  .credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .credit a:hover,
+  .credit a:focus-visible { color: var(--accent); }
 
   .error {
     margin: 0;
@@ -329,7 +343,7 @@ export class JapanPrefectureMapElement extends HTMLElement {
       const levels = this.#readLevels();
       const stats = getJapanStats(levels);
 
-      this.#root.innerHTML = `<style>${styles}</style><section class="widget" part="widget" data-theme="${theme}" lang="${locale}" aria-label="${copy.title}"><header class="summary" part="summary"><div><span class="score-label">${copy.score}</span><div class="score" part="score" data-score="${stats.score}" aria-label="${copy.score} ${stats.score}">${digitsFor(stats.score)}</div></div><dl class="stats" part="stats"><div class="stat"><dt>${copy.visited}</dt><dd>${stats.visited}<small> / ${stats.total}</small></dd></div><div class="stat"><dt>${copy.stayed}</dt><dd>${stats.stayed}</dd></div><div class="stat"><dt>${copy.lived}</dt><dd>${stats.lived}</dd></div></dl></header><div class="map-stage" part="map">${renderMap(levels, locale)}</div><details class="legend" part="legend"><summary>${copy.legend}</summary><ol class="legend-list">${legendFor(locale)}</ol><p class="method">${copy.method}</p><p class="credit">${copy.source}: <a href="https://github.com/ukyouz/JapanEx" rel="external noopener">JapanEx</a> · MIT</p></details></section>`;
+      this.#root.innerHTML = `<style>${styles}</style><section class="widget" part="widget" data-theme="${theme}" lang="${locale}" aria-label="${copy.title}"><header class="summary" part="summary"><div><span class="score-label">${copy.score}</span><div class="score" part="score" data-score="${stats.score}" aria-label="${copy.score} ${stats.score}">${digitsFor(stats.score)}</div></div><dl class="stats" part="stats"><div class="stat"><dt>${copy.visited}</dt><dd>${stats.visited}<small> / ${stats.total}</small></dd></div><div class="stat"><dt>${copy.stayed}</dt><dd>${stats.stayed}</dd></div><div class="stat"><dt>${copy.lived}</dt><dd>${stats.lived}</dd></div></dl></header><div class="map-stage" part="map">${renderMap(levels, locale)}</div><details class="legend" part="legend"><summary>${copy.legend}</summary><ol class="legend-list">${legendFor(locale)}</ol><div class="legend-meta"><p class="method">${copy.method}</p><p class="credit"><strong>Made by <a href="https://github.com/HeiTang" rel="external noopener">HeiTang</a></strong> · Map geometry based on <a href="https://github.com/ukyouz/JapanEx" rel="external noopener">JapanEx</a> (MIT)</p></div></details></section>`;
 
       if (!this.#animated && stats.score > 0) {
         this.#animated = true;

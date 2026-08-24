@@ -39,6 +39,11 @@ const editorCopy = {
     embed: '再貼入產生的元件：',
     copied: '嵌入碼已複製',
     copyError: '複製失敗，請手動選取嵌入碼',
+    ssrSummary: '不想載入前端 JavaScript？使用 SSR SVG（Astro）',
+    ssrHint: '這段程式會在建置時輸出純 SVG；主題與配色請在網站 CSS 覆寫。',
+    ssrCopy: '複製 Astro SSR 程式碼',
+    ssrCopied: 'Astro SSR 程式碼已複製',
+    ssrCopyError: '複製失敗，請手動選取 Astro SSR 程式碼',
   },
   ja: {
     subtitle: 'JapanExを基にした埋め込み可能な都道府県マップ',
@@ -66,6 +71,11 @@ const editorCopy = {
     embed: '生成されたコンポーネントを貼り付けます：',
     copied: '埋め込みコードをコピーしました',
     copyError: 'コピーできませんでした。コードを手動で選択してください',
+    ssrSummary: 'フロントエンド JavaScript なしで使う：SSR SVG（Astro）',
+    ssrHint: 'このコードはビルド時に SVG を出力します。テーマと配色はサイトの CSS で上書きしてください。',
+    ssrCopy: 'Astro SSR コードをコピー',
+    ssrCopied: 'Astro SSR コードをコピーしました',
+    ssrCopyError: 'コピーできませんでした。Astro SSR コードを手動で選択してください',
   },
   en: {
     subtitle: 'A Web Component adaptation of JapanEx',
@@ -93,6 +103,11 @@ const editorCopy = {
     embed: 'Then paste the generated component:',
     copied: 'Embed code copied',
     copyError: 'Copy failed. Select the embed code manually.',
+    ssrSummary: 'Need SVG without client-side JavaScript? Use SSR SVG (Astro)',
+    ssrHint: 'This renders a static SVG at build time. Override colors in your site CSS.',
+    ssrCopy: 'Copy Astro SSR code',
+    ssrCopied: 'Astro SSR code copied',
+    ssrCopyError: 'Copy failed. Select the Astro SSR code manually.',
   },
 } as const satisfies Record<JapanMapLocale, Record<string, string>>;
 
@@ -129,12 +144,17 @@ const levelList = required<HTMLOListElement>('#level-list');
 const embedGuideTitle = required<HTMLElement>('#embed-guide-title');
 const markup = required<HTMLElement>('#markup');
 const copyButton = required<HTMLButtonElement>('#copy');
+const ssrSummary = required<HTMLElement>('#ssr-summary');
+const ssrHint = required<HTMLElement>('#ssr-hint');
+const ssrMarkup = required<HTMLElement>('#ssr-markup');
+const ssrCopyButton = required<HTMLButtonElement>('#copy-ssr');
 const resetButton = required<HTMLButtonElement>('#reset');
 const resetButtonLabel = required<HTMLElement>('#reset span');
 const exportButton = required<HTMLButtonElement>('#export-image');
 const exportButtonLabel = required<HTMLElement>('#export-image span');
 const mapActionStatus = required<HTMLElement>('#map-action-status');
 const copyStatus = required<HTMLElement>('#copy-status');
+const ssrCopyStatus = required<HTMLElement>('#ssr-copy-status');
 const installHint = required<HTMLElement>('#install-hint');
 const embedHint = required<HTMLElement>('#embed-hint');
 
@@ -182,6 +202,9 @@ function update() {
   exportButtonLabel.textContent = copy.exportImage;
   installHint.textContent = copy.install;
   embedHint.textContent = copy.embed;
+  ssrSummary.textContent = copy.ssrSummary;
+  ssrHint.textContent = copy.ssrHint;
+  ssrCopyButton.textContent = copy.ssrCopy;
   prefectureSelect.innerHTML = prefectures.map(prefecture => `<option value="${prefecture.code}">${prefecture.names[locale]}</option>`).join('');
   prefectureSelect.value = selectedPrefecture;
   mobileLevelSelect.innerHTML = levelLabels[locale].map((item, level) => `<option value="${level}">Level ${level} · ${item.label}</option>`).join('');
@@ -191,6 +214,17 @@ function update() {
 
   const value = JSON.stringify(sparseLevels(levels));
   markup.textContent = `<japan-prefecture-map\n  locale="${preview.locale}"\n  theme="${preview.theme}"\n  levels='${value}'\n></japan-prefecture-map>`;
+  ssrMarkup.textContent = `---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+
+const levels = ${value} satisfies PrefectureLevels;
+---
+
+<!-- Include mapStyles once per page. -->
+<style is:inline set:html={mapStyles} />
+<div set:html={renderMap(levels, '${preview.locale}')} />
+<small>Made by <a href="https://github.com/HeiTang">HeiTang</a> · Map geometry based on <a href="https://github.com/ukyouz/JapanEx">JapanEx</a> (MIT)</small>`;
 }
 
 function setPrefectureLevel(code: PrefectureCode, level: 0 | 1 | 2 | 3 | 4 | 5) {
@@ -220,6 +254,7 @@ preview.shadowRoot?.addEventListener('keydown', event => {
 localeSelect.addEventListener('change', () => {
   mapActionStatus.textContent = '';
   copyStatus.textContent = '';
+  ssrCopyStatus.textContent = '';
   update();
 });
 themeSelect.addEventListener('change', update);
@@ -236,6 +271,7 @@ resetButton.addEventListener('click', () => {
   levels = {};
   mapActionStatus.textContent = '';
   copyStatus.textContent = '';
+  ssrCopyStatus.textContent = '';
   update();
 });
 
@@ -506,6 +542,16 @@ copyButton.addEventListener('click', async () => {
     track('copy_embed_code');
   } catch {
     copyStatus.textContent = copy.copyError;
+  }
+});
+
+ssrCopyButton.addEventListener('click', async () => {
+  const copy = editorCopy[preview.locale];
+  try {
+    await navigator.clipboard.writeText(ssrMarkup.textContent ?? '');
+    ssrCopyStatus.textContent = copy.ssrCopied;
+  } catch {
+    ssrCopyStatus.textContent = copy.ssrCopyError;
   }
 });
 
