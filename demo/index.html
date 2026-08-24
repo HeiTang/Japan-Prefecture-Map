@@ -208,6 +208,29 @@
         border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
 
+      .ssr-guide {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .ssr-guide summary {
+        cursor: pointer;
+        color: #f7f8fa;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+
+      .ssr-guide summary:focus-visible {
+        outline: 2px solid #ff9a6f;
+        outline-offset: 0.25rem;
+        border-radius: 0.25rem;
+      }
+
+      .ssr-guide[open] summary { margin-bottom: 0.75rem; }
+      .ssr-guide .hint { margin: 0; }
+
       .copy-action { margin-top: 0.75rem; }
       .copy-action button { width: 100%; }
 
@@ -335,6 +358,16 @@ import 'japan-prefecture-map';</code></pre>
               <button id="copy" class="primary" type="button">複製嵌入碼</button>
             </div>
             <p id="copy-status" class="status" role="status" aria-live="polite"></p>
+
+            <details id="ssr-guide" class="ssr-guide">
+              <summary id="ssr-summary">不想載入前端 JavaScript？使用 SSR SVG（Astro）</summary>
+              <p id="ssr-hint" class="hint">這段程式會在建置時輸出純 SVG；主題與配色請在網站 CSS 覆寫。</p>
+              <pre><code id="ssr-markup"></code></pre>
+              <div class="copy-action">
+                <button id="copy-ssr" type="button">複製 Astro SSR 程式碼</button>
+              </div>
+              <p id="ssr-copy-status" class="status" role="status" aria-live="polite"></p>
+            </details>
           </section>
         </aside>
       </div>
