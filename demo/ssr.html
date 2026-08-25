@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Japan Prefecture Map 的零 JavaScript Static HTML renderer 實際輸出與原生互動式整合導覽。" />
+    <title>Static HTML Renderer Guide · Japan Prefecture Map</title>
+    <style>
+      :root {
+        --canvas: #0b1018;
+        --panel: #121a27;
+        --panel-raised: #182334;
+        --line: rgba(196, 219, 246, 0.15);
+        --text: #f1f6fc;
+        --muted: #9cacc0;
+        --signal: #8de0bd;
+        --jpm-level-0: #252b35;
+        --jpm-level-0-stripe: #39404c;
+        --jpm-level-1: #ffe3d6;
+        --jpm-level-2: #ffc1a5;
+        --jpm-level-3: #ff9a6f;
+        --jpm-level-4: #f66f41;
+        --jpm-level-5: #c9461f;
+        color-scheme: dark;
+        background: var(--canvas);
+        color: var(--text);
+        font-family: "IBM Plex Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--canvas); }
+      body { min-width: 0; margin: 0; }
+      a { color: inherit; }
+      a:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; border-radius: 0.2rem; }
+
+      .shell {
+        width: min(1320px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 3rem 0 4rem;
+      }
+
+      .site-header {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr) 44px;
+        gap: 1rem 2rem;
+        align-items: center;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .site-brand {
+        color: var(--text);
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        text-decoration: none;
+      }
+
+      .route-switcher {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 1rem;
+        align-items: center;
+        justify-self: end;
+      }
+
+      .route-switcher a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0.5rem 0;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        font-size: clamp(0.72rem, 2.7vw, 0.82rem);
+        font-weight: 700;
+        line-height: 1.2;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .route-switcher a:hover { color: var(--signal); }
+      .route-switcher a[aria-current="page"] { border-bottom-color: var(--signal); color: var(--signal); }
+      #route-component:hover, #route-component:focus-visible { color: #ff9a6f; }
+
+      .github-link {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .github-link:hover, .github-link:focus-visible { color: var(--signal); }
+      .github-link svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.55fr);
+        gap: 2rem;
+        align-items: end;
+        padding: clamp(2rem, 4vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+      }
+
+      .eyebrow {
+        display: flex;
+        gap: 0.65rem;
+        align-items: center;
+        margin: 0 0 1rem;
+        color: var(--signal);
+        font: 700 0.75rem/1 "JetBrains Mono", ui-monospace, monospace;
+        letter-spacing: 0.12em;
+      }
+
+      .eyebrow::before {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 1.25rem currentColor;
+        content: '';
+      }
+
+      h1 {
+        max-width: none;
+        margin: 0;
+        font-size: clamp(2.25rem, 5vw, 4.5rem);
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        text-wrap: balance;
+      }
+
+      .hero-copy {
+        max-width: 34rem;
+        margin: 1.35rem 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.18rem);
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 1.5rem;
+      }
+
+      .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 0.65rem;
+        color: var(--text);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .action-link:hover { border-color: var(--signal); color: var(--signal); }
+      .action-link-static { border-color: var(--signal); color: var(--signal); }
+      .action-link-primary { border-color: var(--signal); background: var(--signal); color: #062017; }
+      .action-link-primary:hover { background: #b2f1cf; color: #062017; }
+
+      .build-proof {
+        display: grid;
+        gap: 0.7rem;
+        padding: 1.25rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: linear-gradient(145deg, rgba(141, 224, 189, 0.09), transparent 60%), var(--panel);
+      }
+
+      .build-proof span { color: var(--muted); font-size: 0.78rem; }
+      .build-proof strong { font: 700 clamp(1.4rem, 3vw, 2rem)/1 "JetBrains Mono", ui-monospace, monospace; }
+      .build-proof code { color: var(--signal); font: 600 0.82rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+
+      .renderer-guide,
+      .docs-section,
+      .style-reference,
+      .customize {
+        margin-top: clamp(3rem, 8vw, 6rem);
+        scroll-margin-top: 1rem;
+      }
+
+      .section-heading {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.04em; }
+      .section-heading p { margin: 0; color: var(--muted); font: 0.8rem/1.5 "JetBrains Mono", ui-monospace, monospace; }
+
+      .renderer-choices {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: var(--line);
+      }
+
+      .renderer-choice {
+        display: grid;
+        gap: 0.75rem;
+        min-width: 0;
+        padding: 1.3rem;
+        background: var(--panel);
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .renderer-choice:hover,
+      .renderer-choice:focus-visible { background: var(--panel-raised); }
+      .renderer-choice code { color: var(--signal); font: 700 0.82rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+      .renderer-choice strong { font-size: 1rem; }
+      .renderer-choice span { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+      .showcase {
+        position: relative;
+        margin-top: clamp(3rem, 8vw, 6rem);
+        padding: clamp(1rem, 3vw, 2rem);
+        border: 1px solid var(--line);
+        border-radius: 1.5rem;
+        background: radial-gradient(circle at 80% 0%, rgba(246, 111, 65, 0.13), transparent 31rem), var(--panel);
+        scroll-margin-top: 1rem;
+      }
+
+      .widget-output { width: min(100%, 880px); margin: 0 auto; }
+      .render-note { margin: 1rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.6; text-align: center; }
+      .render-note code { color: var(--signal); font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+      .composition { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 1rem; }
+      .composition-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(17rem, 0.9fr);
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: var(--line);
+      }
+
+      .piece { min-width: 0; padding: clamp(1.1rem, 3vw, 2rem); background: var(--panel); }
+      .piece-label { margin: 0 0 1.25rem; color: var(--signal); font: 700 0.75rem/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; }
+      .map-piece { background: radial-gradient(circle at 50% 45%, rgba(246, 111, 65, 0.11), transparent 48%), var(--panel); }
+      .legend-piece { --jpm-text: var(--text); --jpm-muted: var(--muted); --jpm-border: var(--line); --jpm-surface-raised: var(--panel-raised); --jpm-accent: var(--signal); }
+
+      .api-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        margin-top: 1rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: var(--line);
+      }
+
+      .api-strip article { padding: 1.3rem; background: var(--panel); }
+      .api-strip code { display: block; margin-bottom: 0.9rem; color: var(--signal); font: 700 0.82rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+      .api-strip p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+
+      .recipe-stack { display: grid; min-width: 0; gap: 0.75rem; }
+      .recipe {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--panel);
+      }
+
+      .recipe[open] { background: linear-gradient(145deg, rgba(141, 224, 189, 0.07), transparent 38%), var(--panel); }
+      .recipe summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.75rem;
+        align-items: center;
+        min-height: 64px;
+        padding: 1rem 1.15rem;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .recipe summary::-webkit-details-marker { display: none; }
+      .recipe summary::after { color: var(--signal); content: '+'; font: 700 1.3rem/1 "JetBrains Mono", ui-monospace, monospace; }
+      .recipe[open] summary::after { content: '−'; }
+      .recipe summary:focus-visible { outline: 2px solid var(--signal); outline-offset: -4px; border-radius: 0.8rem; }
+      .recipe-title { display: grid; gap: 0.3rem; }
+      .recipe-title code { color: var(--signal); font: 700 0.85rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+      .recipe-title span { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+      .recipe-meta { color: var(--text); font: 600 0.75rem/1.3 "JetBrains Mono", ui-monospace, monospace; text-align: right; }
+      .recipe-content { min-width: 0; padding: 0 1.15rem 1.15rem; }
+      .recipe-content > p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+      .recipe-content pre {
+        max-width: 100%;
+        overflow: auto;
+        margin: 1rem 0;
+        padding: 1rem;
+        border: 1px solid rgba(196, 219, 246, 0.09);
+        border-radius: 0.75rem;
+        background: #080d14;
+        color: #dce8f6;
+        font: 0.8rem/1.6 "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      .recipe-content pre code { font: inherit; }
+      .recipe-note {
+        padding: 0.85rem 0.95rem;
+        border-left: 2px solid var(--signal);
+        border-radius: 0 0.6rem 0.6rem 0;
+        background: rgba(141, 224, 189, 0.06);
+      }
+
+      .recipe-note strong { color: var(--text); }
+      .docs-grid { display: grid; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+      .light-dom-guide { margin-top: 0.75rem; }
+      .docs-links { margin: 1rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.65; }
+      .docs-links a { color: var(--signal); text-underline-offset: 0.2em; }
+
+      .conversion-cta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1.5rem;
+        align-items: center;
+        margin-top: clamp(3rem, 8vw, 6rem);
+        padding: clamp(1.25rem, 4vw, 2rem);
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: radial-gradient(circle at 90% 0%, rgba(141, 224, 189, 0.14), transparent 28rem), var(--panel);
+      }
+
+      .conversion-cta h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.04em; }
+      .conversion-copy { max-width: 40rem; margin: 0.65rem 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+      .conversion-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: flex-end; }
+      .conversion-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 0.65rem;
+        color: var(--text);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .conversion-link:hover { border-color: var(--signal); color: var(--signal); }
+      .conversion-link-component:hover, .conversion-link-component:focus-visible { border-color: #ff9a6f; color: #ff9a6f; outline-color: #ff9a6f; }
+      .conversion-link-primary { border-color: var(--signal); background: var(--signal); color: #062017; }
+      .conversion-link-primary:hover { border-color: #b2f1cf; background: #b2f1cf; color: #062017; }
+
+      .site-footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .site-footer a { color: inherit; text-decoration: none; }
+      .site-footer a:hover, .site-footer a:focus-visible { color: var(--signal); }
+
+      @media (max-width: 720px) {
+        .site-header { grid-template-columns: minmax(0, 1fr) 44px; }
+        .site-brand { grid-column: 1; grid-row: 1; }
+        .route-switcher { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
+        .github-link { grid-column: 2; grid-row: 1; }
+        .hero { grid-template-columns: 1fr; }
+        .renderer-choices, .composition-grid, .api-strip, .docs-grid { grid-template-columns: minmax(0, 1fr); }
+        .recipe summary { grid-template-columns: minmax(0, 1fr) auto; }
+        .recipe-meta { display: none; }
+        .conversion-cta { grid-template-columns: minmax(0, 1fr); }
+        .conversion-actions { justify-content: flex-start; }
+      }
+    </style>
+    <!-- ssr-widget-styles -->
+  </head>
+  <body>
+    <main class="shell">
+      <header class="site-header">
+        <a class="site-brand" href="./">JAPAN PREFECTURE MAP</a>
+        <nav class="route-switcher" aria-label="產品路徑">
+          <a id="route-editor" href="./">建立地圖</a>
+          <a id="route-component" href="./component.html">Web Component</a>
+          <a id="route-static" href="./ssr.html" aria-current="page">Static HTML</a>
+        </nav>
+        <a id="github-link" class="github-link" href="https://github.com/HeiTang/Japan-Prefecture-Map" rel="external noopener" aria-label="在 GitHub 查看原始碼" title="在 GitHub 查看原始碼">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.51-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.91-3.64-4.02 0-.89.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.38 7.38 0 0 1 8 3.91c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.12-1.87 3.81-3.65 4.02.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.47.55.39A8.15 8.15 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/></svg>
+        </a>
+      </header>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">BUILD-TIME OUTPUT</p>
+          <h1 id="page-title">完整的靜態制縣元件。</h1>
+          <p class="hero-copy">這個頁面只由 Node 在建置時輸出 HTML。沒有 custom element、hydration 或瀏覽器端 JavaScript，地圖、統計、分級與 attribution 都已在原始碼內。</p>
+          <div class="hero-actions">
+            <a class="action-link action-link-primary" href="#output">先看實際輸出</a>
+            <a class="action-link action-link-static" href="#recipes">查看建置時程式碼</a>
+          </div>
+        </div>
+        <aside class="build-proof" aria-label="SSR 驗證資訊">
+          <span>Renderer</span>
+          <strong>SSR / SSG</strong>
+          <code>0 scripts · 2 SVG maps</code>
+        </aside>
+      </section>
+
+      <section class="renderer-guide" aria-labelledby="renderer-guide-title">
+        <div class="section-heading">
+          <h2 id="renderer-guide-title">先選擇要輸出的範圍</h2>
+          <p>每頁只載入一次對應的 *Styles</p>
+        </div>
+        <div class="renderer-choices">
+          <a class="renderer-choice" href="#widget-title">
+            <code>renderWidget()</code>
+            <strong>完整制縣卡片</strong>
+            <span>分數、統計、地圖、圖例與 attribution 都交給套件，搭配 <code>widgetStyles</code>。</span>
+          </a>
+          <a class="renderer-choice" href="#composition-title">
+            <code>renderMap() + renderLegend()</code>
+            <strong>地圖加標準分級</strong>
+            <span>頁面已有標題、分數或版面，只保留 SVG 與 0–5 說明。</span>
+          </a>
+          <a class="renderer-choice" href="#legend-piece-title">
+            <code>renderLegend()</code>
+            <strong>只放分級說明</strong>
+            <span>把旅行等級、方法說明與 attribution 放到 sidebar 或 footer。</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="output" class="showcase" aria-labelledby="widget-title">
+        <div class="section-heading">
+          <h2 id="widget-title">完整靜態 widget</h2>
+          <p>renderWidget(levels, 'zh-TW', options)</p>
+        </div>
+        <div id="ssr-widget-output" class="widget-output">
+          <!-- ssr-widget -->
+        </div>
+        <p class="render-note">此區塊由 <code>renderWidget()</code> 產生，包含分數、統計、SVG 地圖、0–5 分級與 JapanEx 歸屬。</p>
+      </section>
+
+      <section class="composition" aria-labelledby="composition-title">
+        <div class="section-heading">
+          <h2 id="composition-title">可組合的 SSR 輸出</h2>
+          <p>不同 idPrefix 可安全共存於同一頁</p>
+        </div>
+        <div class="composition-grid">
+          <article class="piece map-piece" aria-labelledby="map-piece-title">
+            <p id="map-piece-title" class="piece-label">renderMap()</p>
+            <div id="ssr-map-output">
+              <!-- ssr-map -->
+            </div>
+          </article>
+          <article class="piece legend-piece" aria-labelledby="legend-piece-title">
+            <p id="legend-piece-title" class="piece-label">renderLegend()</p>
+            <div id="ssr-legend-output">
+              <!-- ssr-legend -->
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="recipes" class="docs-section" aria-labelledby="recipes-title">
+        <div class="section-heading">
+          <h2 id="recipes-title">三種建置時範例</h2>
+          <p>展開一種，貼進你的 Astro、SSG 或 server component</p>
+        </div>
+        <div class="recipe-stack">
+          <details id="widget-recipe" class="recipe" open>
+            <summary>
+              <span class="recipe-title">
+                <code>renderWidget()</code>
+                <span>完整卡片，適合個人頁、旅行頁與不想寫額外版面的文章。</span>
+              </span>
+              <span class="recipe-meta">widgetStyles</span>
+            </summary>
+            <div class="recipe-content">
+              <p>這是最短的完整輸出。選擇 <code>theme</code> 與唯一的 <code>idPrefix</code>，其餘內容在建置時完成。</p>
+              <pre><code>---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import { renderWidget, widgetStyles } from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
+---
+
+&lt;style is:inline set:html={widgetStyles}&gt;&lt;/style&gt;
+&lt;div class="my-japan-map" set:html={renderWidget(levels, 'zh-TW', {
+  theme: 'auto',
+  idPrefix: 'profile-map',
+})} /&gt;</code></pre>
+              <p class="recipe-note"><strong>只插入一次：</strong><code>widgetStyles</code> 已包含地圖與圖例樣式，不要再插入 <code>mapStyles</code> 或 <code>legendStyles</code>。</p>
+            </div>
+          </details>
+
+          <details id="map-recipe" class="recipe">
+            <summary>
+              <span class="recipe-title">
+                <code>renderMap() + renderLegend()</code>
+                <span>保留你自己的分數、統計與外層版面，只拿標準地圖和圖例。</span>
+              </span>
+              <span class="recipe-meta">mapStyles + legendStyles</span>
+            </summary>
+            <div class="recipe-content">
+              <p>兩個 renderer 可並排、分欄或放入既有文章版面。它們各自輸出 light DOM HTML。</p>
+              <pre><code>---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import {
+  legendStyles, mapStyles,
+  renderLegend, renderMap,
+} from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
+---
+
+&lt;style is:inline set:html={mapStyles}&gt;&lt;/style&gt;
+&lt;style is:inline set:html={legendStyles}&gt;&lt;/style&gt;
+
+&lt;div set:html={renderMap(levels, 'zh-TW', {
+  idPrefix: 'article-map',
+})} /&gt;
+&lt;div set:html={renderLegend('zh-TW', { open: true })} /&gt;</code></pre>
+              <p class="recipe-note"><strong>圖例本身可互動：</strong><code>renderLegend()</code> 輸出原生 <code>&lt;details&gt;</code>。你正在上方看到的圖例不靠任何 client script。</p>
+            </div>
+          </details>
+
+          <details id="legend-recipe" class="recipe">
+            <summary>
+              <span class="recipe-title">
+                <code>renderLegend()</code>
+                <span>只需要旅行等級、方法說明與 attribution 時，放進 sidebar 或 footer。</span>
+              </span>
+              <span class="recipe-meta">legendStyles</span>
+            </summary>
+            <div class="recipe-content">
+              <p>不需要地圖也能使用。這條路徑適合既有頁面已經有自己的地圖或資料視覺化。</p>
+              <pre><code>---
+import { legendStyles, renderLegend } from 'japan-prefecture-map/render';
+---
+
+&lt;style is:inline set:html={legendStyles}&gt;&lt;/style&gt;
+&lt;div set:html={renderLegend('zh-TW', { open: true })} /&gt;</code></pre>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="style-reference" aria-labelledby="style-reference-title">
+        <div class="section-heading">
+          <h2 id="style-reference-title">樣式載入只有一條規則</h2>
+          <p>每頁或共用 layout 只插入一次</p>
+        </div>
+        <div class="api-strip">
+          <article>
+            <code>mapStyles</code>
+            <p>純 SVG 地圖的唯一樣式來源。使用 map-only 輸出時，每頁載入一次。</p>
+          </article>
+          <article>
+            <code>legendStyles</code>
+            <p>可獨立搭配圖例使用，保留原生 details 與完整 attribution。</p>
+          </article>
+          <article>
+            <code>widgetStyles</code>
+            <p>完整卡片的自足樣式，內含 map 與 legend 樣式，適合直接搭配 renderWidget。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="customize" class="customize" aria-labelledby="customize-title">
+        <div class="section-heading">
+          <h2 id="customize-title">再往下客製</h2>
+          <p>CSS token、light DOM selector 與 SVG ID 安全性</p>
+        </div>
+        <div class="docs-grid">
+          <details id="style-guide" class="recipe" open>
+            <summary>
+              <span class="recipe-title">
+                <code>--jpm-*</code>
+                <span>將 token 設在包住 renderer output 的容器上。</span>
+              </span>
+              <span class="recipe-meta">外層容器</span>
+            </summary>
+            <div class="recipe-content">
+              <p>Static renderer 是 light DOM，輸出會直接繼承外層容器的 token。</p>
+              <pre><code>.my-japan-map {
+  --jpm-level-4: #3c9b7c;
+  --jpm-level-5: #17684e;
+  --jpm-map-font: "Noto Sans TC", sans-serif;
+}</code></pre>
+            </div>
+          </details>
+
+          <details id="id-prefix-guide" class="recipe">
+            <summary>
+              <span class="recipe-title">
+                <code>idPrefix</code>
+                <span>同頁輸出兩張以上地圖時，每張都要使用不同前綴。</span>
+              </span>
+              <span class="recipe-meta">SVG a11y IDs</span>
+            </summary>
+            <div class="recipe-content">
+              <p>這會避免 SVG 的 title、description 與 pattern ID 重複，讓每張地圖仍可被正確標示。</p>
+              <pre><code>renderMap(homeLevels, 'zh-TW', {
+  idPrefix: 'home-map',
+});
+
+renderMap(articleLevels, 'ja', {
+  idPrefix: 'article-map',
+});</code></pre>
+            </div>
+          </details>
+        </div>
+        <details id="light-dom-guide" class="recipe light-dom-guide">
+          <summary>
+            <span class="recipe-title">
+              <code>:global(.jpm-*)</code>
+              <span>Static output 是 light DOM，可直接選取輸出的 class。</span>
+            </span>
+            <span class="recipe-meta">Astro scoped CSS</span>
+          </summary>
+          <div class="recipe-content">
+            <p>一般 CSS 可直接使用 <code>.jpm-widget</code>。Astro 的 <code>set:html</code> output 沒有 scoped attribute，因此在元件的 scoped style 內需要用 <code>:global()</code>。</p>
+            <pre><code>.my-japan-map :global(.jpm-widget) {
+  max-width: 56rem;
+  border-radius: 1.5rem;
+}
+
+.my-japan-map :global(.jpm-summary) {
+  padding-block: 2rem 1rem;
+}
+
+.my-japan-map :global(.jpm-map-stage) {
+  padding-inline: 2rem;
+}</code></pre>
+          </div>
+        </details>
+        <p class="docs-links">需要完整 API、Astro / Next 範例與 class/token 對照時，查看 <a href="https://github.com/HeiTang/Japan-Prefecture-Map#readme" rel="external noopener">README</a> 與 <a href="https://github.com/HeiTang/Japan-Prefecture-Map/blob/main/docs/styling.md" rel="external noopener">Styling guide</a>。</p>
+      </section>
+
+      <section class="conversion-cta" aria-labelledby="conversion-title">
+        <div>
+          <p class="piece-label">READY TO BUILD?</p>
+          <h2 id="conversion-title">用自己的旅行資料開始</h2>
+          <p class="conversion-copy">你已確認頁面要保持零 client JavaScript。回到 Editor 後可設定全部 47 縣，並直接取得這條 Static HTML renderer 路徑的程式碼。</p>
+        </div>
+        <div class="conversion-actions">
+          <a id="editor-static-cta" class="conversion-link conversion-link-primary" href="./?path=static">用零 JavaScript 路徑建立地圖</a>
+          <a class="conversion-link conversion-link-component" href="./component.html">需要即時互動？</a>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <a href="https://github.com/HeiTang" rel="external noopener">Copyright © 2026 HeiTang</a>
+        <span aria-hidden="true"> · </span>
+        <a id="footer-source" href="https://github.com/ukyouz/JapanEx" rel="external noopener">Based on JapanEx</a>
+        <span aria-hidden="true"> · </span>
+        <a href="https://github.com/HeiTang/Japan-Prefecture-Map/blob/main/LICENSE" rel="external noopener">MIT License</a>
+      </footer>
+    </main>
+  </body>
+</html>
