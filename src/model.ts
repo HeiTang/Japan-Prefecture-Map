@@ -128,11 +128,11 @@ if (prefectures.length !== 47 || prefectureCodes.size !== 47) {
   throw new Error('[japan-prefecture-map] prefectures must contain 47 unique codes');
 }
 
-export function isLocale(value: string | null): value is JapanMapLocale {
+export function isLocale(value: unknown): value is JapanMapLocale {
   return locales.includes(value as JapanMapLocale);
 }
 
-export function isTheme(value: string | null): value is JapanMapTheme {
+export function isTheme(value: unknown): value is JapanMapTheme {
   return themes.includes(value as JapanMapTheme);
 }
 
