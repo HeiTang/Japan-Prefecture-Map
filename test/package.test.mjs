@@ -34,18 +34,22 @@ test('installs the packed package and resolves its data and render entrypoints',
         '--input-type=module',
         '-e',
         `import { prefectures } from 'japan-prefecture-map/data';
-         import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+         import { legendStyles, mapStyles, renderLegend, renderMap, renderWidget, widgetStyles } from 'japan-prefecture-map/render';
          const svg = renderMap({ '13': 4 }, 'zh-TW');
+         const legend = renderLegend('zh-TW');
+         const widget = renderWidget({ '13': 4 }, 'zh-TW');
          console.log(JSON.stringify({
-           prefectures: prefectures.length,
-           labels: (svg.match(/<title>/g) ?? []).length,
-           styled: mapStyles.includes('.japan-map'),
-         }));`,
+            prefectures: prefectures.length,
+            labels: (svg.match(/<title>/g) ?? []).length,
+            styled: mapStyles.includes('.japan-map'),
+            legend: legend.includes('jpm-legend') && legendStyles.includes('.jpm-legend'),
+            widget: widget.includes('jpm-widget') && widgetStyles.includes('.jpm-widget'),
+          }));`,
       ],
       { cwd: directory },
     );
 
-    assert.deepEqual(JSON.parse(exported), { prefectures: 47, labels: 47, styled: true });
+    assert.deepEqual(JSON.parse(exported), { prefectures: 47, labels: 47, styled: true, legend: true, widget: true });
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

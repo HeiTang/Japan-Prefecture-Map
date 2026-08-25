@@ -2,7 +2,7 @@
 
 ## Astro
 
-Choose the Web Component when the page needs the complete card. Use server-rendered SVG only when the user explicitly needs static HTML, no client JavaScript, or only the map.
+Choose the Web Component when the page needs browser-side updates. When the page needs static HTML and no client JavaScript, use `renderWidget()` for the complete card or `renderMap()` for a map-only layout.
 
 ### Web Component (default)
 
@@ -27,14 +27,14 @@ Do not import the root `japan-prefecture-map` entrypoint in Astro frontmatter. F
 
 Place a site-wide import in a shared client script only when multiple pages use the component. Otherwise keep the import beside the page to avoid widening scope.
 
-### Server-rendered SVG
+### Static renderer
 
-`japan-prefecture-map/render` is DOM-free, so it is safe in frontmatter. It renders the map only: add surrounding title or statistics with the site's ordinary template code when needed.
+`japan-prefecture-map/render` is DOM-free, so it is safe in frontmatter. `renderWidget()` outputs the complete static card, including statistics, the expandable legend, and attribution.
 
 ```astro
 ---
 import type { PrefectureLevels } from 'japan-prefecture-map/data';
-import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+import { renderWidget, widgetStyles } from 'japan-prefecture-map/render';
 
 const levels = {
   '01': 4,
@@ -45,12 +45,12 @@ const levels = {
 
 <section aria-labelledby="japan-map-title">
   <h1 id="japan-map-title">My Japan Travel Map</h1>
-  <div set:html={renderMap(levels, 'zh-TW')} />
+  <div set:html={renderWidget(levels, 'zh-TW', { idPrefix: 'japan-travel-map', theme: 'auto' })} />
 </section>
-<style is:inline set:html={mapStyles}></style>
+<style is:inline set:html={widgetStyles}></style>
 ```
 
-Include `mapStyles` once per page or shared layout. Do not import the root entrypoint or add a client script for this path.
+For a map-only layout, use `renderMap()` with `mapStyles`; add `renderLegend()` with `legendStyles` when the page needs the package's 0–5 legend. Include each chosen style export once per page or shared layout. Do not import the root entrypoint or add a client script for static renderer output.
 
 ## Browser-side Vite projects
 
@@ -64,4 +64,4 @@ Place the Editor-generated element in the existing template or page component. W
 
 ## Verification
 
-Run the existing build command. For the Web Component, confirm the custom element is registered and visible. For server-rendered SVG, confirm the generated HTML contains the SVG and inline map styles without a client package import.
+Run the existing build command. For the Web Component, confirm the custom element is registered and visible. For static renderer output, confirm the generated HTML contains the selected SVG/widget markup and styles without a client package import.

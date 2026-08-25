@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Japan Prefecture Map Web Component 的瀏覽器端 runtime、即時屬性更新與最小嵌入範例。" />
+    <title>Web Component Runtime Demo · Japan Prefecture Map</title>
+    <style>
+      :root {
+        --canvas: #0c1016;
+        --panel: #151a22;
+        --panel-raised: #202733;
+        --line: rgba(196, 219, 246, 0.15);
+        --text: #f7f8fa;
+        --muted: #a9b3c1;
+        --signal: #ff9a6f;
+        --signal-strong: #f66f41;
+        --mint: #8de0bd;
+        color-scheme: dark;
+        background: var(--canvas);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--canvas); }
+      body { min-width: 0; margin: 0; }
+      a { color: inherit; }
+      a:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; border-radius: 0.25rem; }
+
+      .shell {
+        width: min(1320px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 3rem 0 4rem;
+      }
+
+      .site-header {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr) 44px;
+        gap: 1rem 2rem;
+        align-items: center;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .site-brand {
+        color: var(--text);
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        text-decoration: none;
+      }
+
+      .route-switcher {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 1rem;
+        align-items: center;
+        justify-self: end;
+      }
+
+      .route-switcher a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0.5rem 0;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        font-size: clamp(0.72rem, 2.7vw, 0.82rem);
+        font-weight: 700;
+        line-height: 1.2;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .route-switcher a:hover { color: var(--signal); }
+      .route-switcher a[aria-current="page"] { border-bottom-color: var(--signal); color: var(--signal); }
+      #route-static:hover, #route-static:focus-visible { color: var(--mint); }
+
+      .github-link {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .github-link:hover, .github-link:focus-visible { color: var(--signal); }
+      .github-link svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.55fr);
+        gap: 2rem;
+        align-items: end;
+        padding: clamp(2rem, 4vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+      }
+
+      .eyebrow {
+        display: flex;
+        gap: 0.65rem;
+        align-items: center;
+        margin: 0 0 1rem;
+        color: var(--signal);
+        font: 700 0.75rem/1 "JetBrains Mono", ui-monospace, monospace;
+        letter-spacing: 0.12em;
+      }
+
+      .eyebrow::before {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 1.25rem currentColor;
+        content: '';
+      }
+
+      h1 {
+        max-width: none;
+        margin: 0;
+        font-size: clamp(2.25rem, 5vw, 4.5rem);
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        text-wrap: balance;
+      }
+
+      .hero-copy {
+        max-width: 37rem;
+        margin: 1.35rem 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.18rem);
+        line-height: 1.7;
+      }
+
+      .hero-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.5rem; }
+      .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 0.65rem;
+        color: var(--text);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .action-link:hover { border-color: var(--signal); color: var(--signal); }
+      .action-link-static:hover, .action-link-static:focus-visible { border-color: var(--mint); color: var(--mint); outline-color: var(--mint); }
+      .action-link-primary { border-color: var(--signal-strong); background: var(--signal-strong); color: #0c1016; }
+      .action-link-primary:hover { border-color: var(--signal); background: var(--signal); color: #0c1016; }
+
+      .runtime-proof {
+        display: grid;
+        gap: 0.7rem;
+        padding: 1.25rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: linear-gradient(145deg, rgba(246, 111, 65, 0.11), transparent 60%), var(--panel);
+      }
+
+      .runtime-proof span { color: var(--muted); font-size: 0.78rem; }
+      .runtime-proof strong { font: 700 clamp(1.4rem, 3vw, 2rem)/1 "JetBrains Mono", ui-monospace, monospace; }
+      .runtime-proof code { color: var(--signal); font: 600 0.82rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+
+      .runtime,
+      .comparison,
+      .recipes,
+      .customize {
+        margin-top: clamp(3rem, 8vw, 6rem);
+        scroll-margin-top: 1rem;
+      }
+
+      .section-heading {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.04em; }
+      .section-heading p { margin: 0; color: var(--muted); font: 0.8rem/1.5 "JetBrains Mono", ui-monospace, monospace; }
+
+      .runtime-lab {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.5rem;
+        background: var(--line);
+      }
+
+      .preview-piece,
+      .control-piece { min-width: 0; padding: clamp(1rem, 3vw, 2rem); background: var(--panel); }
+      .preview-piece { background: radial-gradient(circle at 75% 10%, rgba(246, 111, 65, 0.13), transparent 30rem), var(--panel); }
+      .piece-label { margin: 0 0 1rem; color: var(--signal); font: 700 0.75rem/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; }
+      .component-frame { padding: clamp(0.55rem, 2vw, 1rem); border: 1px solid rgba(196, 219, 246, 0.1); border-radius: 1rem; background: #0c1016; }
+      #component-preview { display: block; min-width: 0; }
+      .runtime-caption { margin: 1rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.65; }
+      .runtime-caption code { color: var(--signal); font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+      .control-piece h3 { margin: 0; font-size: 1.1rem; }
+      .control-copy { margin: 0.55rem 0 1.25rem; color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+      .control-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+      .field { display: grid; gap: 0.45rem; }
+      label, .control-label { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+      select, button {
+        min-height: 44px;
+        border: 1px solid rgba(196, 219, 246, 0.16);
+        border-radius: 0.75rem;
+        background: var(--panel-raised);
+        color: var(--text);
+        font: inherit;
+      }
+
+      select { width: 100%; padding-inline: 0.75rem; }
+      button { padding: 0.7rem 0.8rem; cursor: pointer; text-align: left; }
+      button:hover, button:focus-visible { border-color: var(--signal); }
+      .preset-fieldset { min-width: 0; margin: 1.25rem 0 0; padding: 0; border: 0; }
+      .preset-heading { margin: 0 0 0.65rem; padding: 0; }
+      .preset-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+      .preset-button { display: grid; gap: 0.25rem; }
+      .preset-button strong { font-size: 0.85rem; }
+      .preset-button span { color: var(--muted); font-size: 0.73rem; line-height: 1.35; }
+      .preset-button[aria-pressed="true"] { border-color: var(--signal); background: linear-gradient(135deg, #38261f, var(--panel-raised)); }
+      .preset-button[aria-pressed="true"] span { color: #d7dee8; }
+      .level-button { width: 100%; margin-top: 0.75rem; border-color: var(--signal-strong); background: var(--signal-strong); color: #0c1016; font-weight: 700; text-align: center; }
+      .level-button:hover, .level-button:focus-visible { border-color: var(--signal); background: var(--signal); }
+      .runtime-state-label { display: block; margin-top: 1.25rem; }
+      #runtime-state {
+        display: block;
+        overflow: auto;
+        margin-top: 0.5rem;
+        padding: 0.85rem;
+        border-radius: 0.75rem;
+        background: #080d14;
+        color: var(--signal);
+        font: 0.78rem/1.55 "JetBrains Mono", ui-monospace, monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .runtime-status { min-height: 1.4em; margin: 0.75rem 0 0; color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: var(--line);
+      }
+
+      .comparison-card { padding: 1.3rem; background: var(--panel); }
+      .comparison-card > code { display: block; margin-bottom: 0.8rem; color: var(--signal); font: 700 0.82rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+      .comparison-card.static > code { color: var(--mint); }
+      .comparison-card h3 { margin: 0; font-size: 1rem; }
+      .comparison-card p { margin: 0.65rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.65; }
+      .comparison-card p code { color: var(--mint); font-family: "JetBrains Mono", ui-monospace, monospace; }
+      .comparison-card a { color: var(--text); font-weight: 700; text-underline-offset: 0.2em; }
+      .comparison-card.static a:hover, .comparison-card.static a:focus-visible { color: var(--mint); outline-color: var(--mint); }
+
+      .recipe-stack { display: grid; gap: 0.75rem; }
+      .recipe { min-width: 0; border: 1px solid var(--line); border-radius: 1rem; background: var(--panel); }
+      .recipe[open] { background: linear-gradient(145deg, rgba(246, 111, 65, 0.08), transparent 38%), var(--panel); }
+      .recipe summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.75rem;
+        align-items: center;
+        min-height: 64px;
+        padding: 1rem 1.15rem;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .recipe summary::-webkit-details-marker { display: none; }
+      .recipe summary::after { color: var(--signal); content: '+'; font: 700 1.3rem/1 "JetBrains Mono", ui-monospace, monospace; }
+      .recipe[open] summary::after { content: '−'; }
+      .recipe summary:focus-visible { outline: 2px solid var(--signal); outline-offset: -4px; border-radius: 0.8rem; }
+      .recipe-title { display: grid; gap: 0.3rem; }
+      .recipe-title code { color: var(--signal); font: 700 0.85rem/1.4 "JetBrains Mono", ui-monospace, monospace; }
+      .recipe-title span { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+      .recipe-content { min-width: 0; padding: 0 1.15rem 1.15rem; }
+      .recipe-content > p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+      .recipe-content a { color: var(--signal); font-weight: 700; text-underline-offset: 0.2em; }
+      .recipe-content pre {
+        max-width: 100%;
+        overflow: auto;
+        margin: 1rem 0 0;
+        padding: 1rem;
+        border: 1px solid rgba(196, 219, 246, 0.09);
+        border-radius: 0.75rem;
+        background: #080d14;
+        color: #dce8f6;
+        font: 0.8rem/1.6 "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      .conversion-cta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1.5rem;
+        align-items: center;
+        margin-top: clamp(3rem, 8vw, 6rem);
+        padding: clamp(1.25rem, 4vw, 2rem);
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: radial-gradient(circle at 90% 0%, rgba(246, 111, 65, 0.15), transparent 28rem), var(--panel);
+      }
+
+      .conversion-cta h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.04em; }
+      .conversion-copy { max-width: 40rem; margin: 0.65rem 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+      .conversion-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: flex-end; }
+      .conversion-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 0.65rem;
+        color: var(--text);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .conversion-link:hover { border-color: var(--signal); color: var(--signal); }
+      .conversion-link-static:hover, .conversion-link-static:focus-visible { border-color: var(--mint); color: var(--mint); outline-color: var(--mint); }
+      .conversion-link-primary { border-color: var(--signal-strong); background: var(--signal-strong); color: #0c1016; }
+      .conversion-link-primary:hover { border-color: var(--signal); background: var(--signal); color: #0c1016; }
+
+      .site-footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .site-footer a { color: inherit; text-decoration: none; }
+      .site-footer a:hover, .site-footer a:focus-visible { color: var(--signal); }
+
+      @media (max-width: 720px) {
+        .site-header { grid-template-columns: minmax(0, 1fr) 44px; }
+        .site-brand { grid-column: 1; grid-row: 1; }
+        .route-switcher { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
+        .github-link { grid-column: 2; grid-row: 1; }
+        .hero, .runtime-lab, .comparison-grid, .conversion-cta { grid-template-columns: minmax(0, 1fr); }
+        .control-fields, .preset-grid { grid-template-columns: minmax(0, 1fr); }
+        .conversion-actions { justify-content: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="site-header">
+        <a class="site-brand" href="./">JAPAN PREFECTURE MAP</a>
+        <nav class="route-switcher" aria-label="產品路徑">
+          <a id="route-editor" href="./">建立地圖</a>
+          <a id="route-component" href="./component.html" aria-current="page">Web Component</a>
+          <a id="route-static" href="./ssr.html">Static HTML</a>
+        </nav>
+        <a id="github-link" class="github-link" href="https://github.com/HeiTang/Japan-Prefecture-Map" rel="external noopener" aria-label="在 GitHub 查看原始碼" title="在 GitHub 查看原始碼">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.51-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.91-3.64-4.02 0-.89.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.38 7.38 0 0 1 8 3.91c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.12-1.87 3.81-3.65 4.02.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.47.55.39A8.15 8.15 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/></svg>
+        </a>
+      </header>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">BROWSER RUNTIME</p>
+          <h1 id="page-title">即時更新的制縣元件。</h1>
+          <p class="hero-copy">這個頁面載入真正的 <code>&lt;japan-prefecture-map&gt;</code>。切換資料、地圖語言或主題後，Custom Element 會在瀏覽器內立刻重新輸出 Shadow DOM，不需要重新建置頁面。</p>
+          <div class="hero-actions">
+            <a class="action-link action-link-primary" href="#runtime">直接操作元件</a>
+            <a class="action-link action-link-static" href="./ssr.html">比較零 JavaScript 輸出</a>
+          </div>
+        </div>
+        <aside class="runtime-proof" aria-label="Web Component 驗證資訊">
+          <span>Runtime</span>
+          <strong>LIVE</strong>
+          <code>1 module · property updates</code>
+        </aside>
+      </section>
+
+      <section id="runtime" class="runtime" aria-labelledby="runtime-title">
+        <div class="section-heading">
+          <h2 id="runtime-title">這是一個真正的 Custom Element</h2>
+          <p>levels · locale · theme</p>
+        </div>
+        <div class="runtime-lab">
+          <article class="preview-piece" aria-labelledby="preview-title">
+            <p id="preview-title" class="piece-label">&lt;japan-prefecture-map&gt;</p>
+            <div class="component-frame">
+              <japan-prefecture-map id="component-preview" locale="zh-TW" theme="dark" levels='{"13":3,"27":3,"34":4}'></japan-prefecture-map>
+            </div>
+            <p class="runtime-caption">這不是截圖或字串輸出。下方 controls 會直接設定 <code>element.levels</code>、<code>element.locale</code> 與 <code>element.theme</code>。</p>
+          </article>
+
+          <aside class="control-piece" aria-labelledby="controls-title">
+            <h3 id="controls-title">即時更新屬性</h3>
+            <p class="control-copy">這些 controls 故意只示範 runtime API；需要編輯全部 47 縣時，請使用 Editor。</p>
+            <div class="control-fields">
+              <div class="field">
+                <label for="component-locale">地圖語言</label>
+                <select id="component-locale">
+                  <option value="zh-TW">繁體中文</option>
+                  <option value="ja">日本語</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="component-theme">主題</label>
+                <select id="component-theme">
+                  <option value="dark">深色</option>
+                  <option value="light">淺色</option>
+                  <option value="auto">跟隨系統</option>
+                </select>
+              </div>
+            </div>
+
+            <fieldset class="preset-fieldset">
+              <legend class="control-label preset-heading">旅行資料 preset</legend>
+              <div class="preset-grid">
+                <button id="preset-weekend" class="preset-button" type="button" data-preset="weekend" aria-pressed="true"><strong>城市週末</strong><span>東京、關西、廣島</span></button>
+                <button id="preset-west" class="preset-button" type="button" data-preset="west" aria-pressed="false"><strong>西日本縱走</strong><span>京都至沖繩</span></button>
+                <button id="preset-all" class="preset-button" type="button" data-preset="all" aria-pressed="false"><strong>混合等級</strong><span>5 個代表縣</span></button>
+                <button id="preset-reset" class="preset-button" type="button" data-preset="reset" aria-pressed="false"><strong>清除資料</strong><span>回到 Level 0</span></button>
+              </div>
+            </fieldset>
+            <button id="level-tokyo" class="level-button" type="button">東京都 +1 Level</button>
+
+            <span class="control-label runtime-state-label">目前 element.levels</span>
+            <output id="runtime-state" aria-label="目前 levels JSON"></output>
+            <p id="runtime-status" class="runtime-status" role="status" aria-live="polite">已載入初始旅行資料。</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="comparison" aria-labelledby="comparison-title">
+        <div class="section-heading">
+          <h2 id="comparison-title">和 Static HTML 的分工</h2>
+          <p>同一資料模型，兩條不同的呈現路徑</p>
+        </div>
+        <div class="comparison-grid">
+          <article class="comparison-card">
+            <code>Web Component</code>
+            <h3>需要瀏覽器 module</h3>
+            <p>適合篩選器、使用者互動、即時切換地圖語言或主題。用屬性或 JavaScript property 更新，不必重建或替換 host element。</p>
+          </article>
+          <article class="comparison-card static">
+            <code>Static HTML renderer</code>
+            <h3>沒有 client runtime</h3>
+            <p>適合 SEO、SSG 與內容頁。HTML 在建置時固定輸出；互動僅使用原生元素，例如 <code>&lt;details&gt;</code>。</p>
+            <p><a href="./ssr.html">查看 Static HTML demo</a></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="recipes" class="recipes" aria-labelledby="recipes-title">
+        <div class="section-heading">
+          <h2 id="recipes-title">最小嵌入與更新方式</h2>
+          <p>載入一次 module，之後更新 element 屬性</p>
+        </div>
+        <div class="recipe-stack">
+          <details class="recipe" open>
+            <summary>
+              <span class="recipe-title">
+                <code>HTML + module</code>
+                <span>最小可用的 Web Component 嵌入。</span>
+              </span>
+            </summary>
+            <div class="recipe-content">
+              <p>這條路徑把顯示邏輯留在瀏覽器。套件註冊 Custom Element 後，HTML 內的地圖就會自行 render。</p>
+              <pre><code>&lt;script type="module" src="https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.3.0/dist/index.js"&gt;&lt;/script&gt;
+
+&lt;japan-prefecture-map
+  locale="zh-TW"
+  theme="auto"
+  levels='{"13": 3, "27": 4}'
+&gt;&lt;/japan-prefecture-map&gt;</code></pre>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary>
+              <span class="recipe-title">
+                <code>element.levels = nextLevels</code>
+                <span>不重載頁面，直接更新資料、地圖語言或主題。</span>
+              </span>
+            </summary>
+            <div class="recipe-content">
+              <p>這正是上方 controls 使用的介面。設定 property 後元件會重新 render 自己的 Shadow DOM。</p>
+              <pre><code>const map = document.querySelector('japan-prefecture-map');
+
+map.levels = { '13': 4, '27': 5 };
+map.locale = 'ja';
+map.theme = 'dark';</code></pre>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section id="customize" class="customize" aria-labelledby="customize-title">
+        <div class="section-heading">
+          <h2 id="customize-title">外觀客製</h2>
+          <p>公開 token 與 part，不碰 Shadow DOM 內部 class</p>
+        </div>
+        <div class="recipe-stack">
+          <details id="component-style-guide" class="recipe" open>
+            <summary>
+              <span class="recipe-title">
+                <code>--jpm-* + ::part()</code>
+                <span>將 token 設在 element 本身，並只選取公開區塊。</span>
+              </span>
+            </summary>
+            <div class="recipe-content">
+              <p>Web Component 自帶 Shadow DOM 與完整 CSS。外部無法選取 <code>.jpm-*</code>；用 token 改配色，用 <code>::part()</code> 調整已承諾的版面區塊。</p>
+              <pre><code>japan-prefecture-map {
+  --jpm-accent: #58c9a2;
+  --jpm-level-4: #2a8f70;
+  --jpm-level-5: #17684e;
+  --jpm-map-glow: none;
+}
+
+japan-prefecture-map::part(summary) {
+  padding-block: 2rem 1rem;
+}
+
+japan-prefecture-map::part(widget) {
+  border-radius: 1.5rem;
+}</code></pre>
+              <p>不要再插入 <code>mapStyles</code>、<code>legendStyles</code> 或 <code>widgetStyles</code>。完整 token 與 part 對照見 <a href="https://github.com/HeiTang/Japan-Prefecture-Map/blob/main/docs/styling.md" rel="external noopener">Styling guide</a>。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="conversion-cta" aria-labelledby="conversion-title">
+        <div>
+          <p class="piece-label">READY TO BUILD?</p>
+          <h2 id="conversion-title">用自己的旅行資料開始</h2>
+          <p class="conversion-copy">你已確認需要 browser runtime。回到 Editor 後可設定全部 47 縣，並直接取得這條互動式整合路徑的程式碼。</p>
+        </div>
+        <div class="conversion-actions">
+          <a id="editor-component-cta" class="conversion-link conversion-link-primary" href="./?path=component">用互動路徑建立地圖</a>
+          <a class="conversion-link conversion-link-static" href="./ssr.html">改看 Static HTML</a>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <a href="https://github.com/HeiTang" rel="external noopener">Copyright © 2026 HeiTang</a>
+        <span aria-hidden="true"> · </span>
+        <a id="footer-source" href="https://github.com/ukyouz/JapanEx" rel="external noopener">Based on JapanEx</a>
+        <span aria-hidden="true"> · </span>
+        <a href="https://github.com/HeiTang/Japan-Prefecture-Map/blob/main/LICENSE" rel="external noopener">MIT License</a>
+      </footer>
+    </main>
+    <script type="module" src="./dist/component-demo.js"></script>
+  </body>
+</html>
