@@ -28,13 +28,13 @@ Replace the example values with the attributes copied from the Editor. Import th
 
 Keep the attributes as strings. Do not create a state layer or JSON file unless the host site already stores page content that way.
 
-## Server-rendered SVG
+## Static renderer
 
-Use this path only when the user explicitly needs static HTML, no hydration, or only the map. It does not include the component card, score, statistics, legend, or `theme` behavior.
+Use this path when the user explicitly needs static HTML and no hydration. `renderWidget()` includes the complete card, score, statistics, legend, attribution, and build-time theme styling; `renderMap()` remains available for map-only layouts.
 
 ```tsx
 import type { PrefectureLevels } from 'japan-prefecture-map/data';
-import { mapStyles, renderMap } from 'japan-prefecture-map/render';
+import { renderWidget, widgetStyles } from 'japan-prefecture-map/render';
 
 const levels = {
   '01': 4,
@@ -46,15 +46,15 @@ export function JapanTravelMapStatic() {
   return (
     <section aria-labelledby="japan-map-title">
       <h1 id="japan-map-title">My Japan Travel Map</h1>
-      <div dangerouslySetInnerHTML={{ __html: renderMap(levels, 'zh-TW') }} />
-      <style>{mapStyles}</style>
+      <div dangerouslySetInnerHTML={{ __html: renderWidget(levels, 'zh-TW', { idPrefix: 'japan-travel-map', theme: 'auto' }) }} />
+      <style>{widgetStyles}</style>
     </section>
   );
 }
 ```
 
-Pass only validated `locale` and `levels` to `renderMap`; never insert raw user HTML. Include `mapStyles` once per page or shared layout.
+Pass only validated `locale` and `levels` to the renderer; never insert raw user HTML. For map-only layouts, use `renderMap()` with `mapStyles`, plus `renderLegend()` and `legendStyles` when needed. Include each chosen style export once per page or shared layout.
 
 ## Verification
 
-Run the existing Next.js build. For the Web Component, inspect the page in a browser because a successful server build does not prove that the custom element registered after hydration. For server-rendered SVG, confirm the rendered HTML includes one `.japan-map` SVG, its styles, and no root package import or hydration requirement.
+Run the existing Next.js build. For the Web Component, inspect the page in a browser because a successful server build does not prove that the custom element registered after hydration. For static renderer output, confirm the rendered HTML includes its SVG/widget markup, styles, and no root package import or hydration requirement.

@@ -18,119 +18,216 @@
 ![Japan Prefecture Map：用地圖記錄你的日本旅程](https://raw.githubusercontent.com/HeiTang/Japan-Prefecture-Map/main/assets/japan-prefecture-map-preview.png)
 
 <p align="center">
-  <strong><a href="https://japanmap.purr.tw/">開啟 Japan Prefecture Map Editor →</a></strong>
+  <strong><a href="https://japanmap.purr.tw/">開啟 Editor</a></strong>
+  ·
+  <strong><a href="https://japanmap.purr.tw/ssr.html">查看零 JavaScript SSR demo</a></strong>
 </p>
-
-## 這是什麼？
 
 Japan Prefecture Map 是基於 [JapanEx](https://github.com/ukyouz/JapanEx) 地圖幾何與制縣等級概念的可嵌入日本 47 都道府縣地圖，讓你以 0–5 級記錄在日本各地的通過、到訪、住宿與居住經驗。
 
-同一份旅行資料可選兩條整合路徑：Web Component 會在瀏覽器顯示完整卡片；Static SVG（SSR / SSG）則在伺服器端或建置時直接輸出純 SVG，不載入前端 JavaScript。
+- **兩種整合路徑**：
 
-它提供：
+  - **Web Component**：瀏覽器內執行的 `<japan-prefecture-map>`。
 
-- 一張完整的日本 47 都道府縣地圖
-- Web Component 的旅行程度、總分與簡單統計
-- Static SVG 的純地圖輸出
-- 繁體中文、日文、英文
-- 不依賴帳號、資料庫或外部服務
+  - **Static HTML renderer**：Node、SSR 或 SSG 在建置時輸出 HTML。
 
+- **可被搜尋與索引**：Static renderer 將地圖、縣名與等級直接輸出到 HTML
 
-## 開始使用
+- **完整旅行呈現**：分數、統計、地圖、0–5 分級與 attribution
 
-### 選擇整合方式
+- **彈性輸出層級**：SVG 地圖、標準分級說明與完整制縣卡片
 
-| 你的需求 | 選擇 | 會得到 |
-| --- | --- | --- |
-| 想直接貼入完整旅遊卡片，需要分數、統計、圖例與主題 | [Web Component](#web-component) | 瀏覽器端元件與完整 UI |
-| 只想要地圖、靜態 HTML、零前端 JavaScript | [Static SVG](#static-svg-ssr--ssg) | 伺服器端或建置期輸出的可存取 SVG |
-| 還不確定 | [🗺️ 線上編輯器](https://japanmap.purr.tw/) | 設定等級後分別複製兩種程式碼 |
-| 想讓 AI 依網站環境完成整合 | [🤖 讓 AI 協助加入網站](https://github.com/HeiTang/Japan-Prefecture-Map/tree/main/skills/add-japan-prefecture-map) | 選擇適合的路徑、加入地圖並調整外觀 |
+- **三語支援**：繁體中文、日文與英文
+
+- **開放且獨立**：MIT 授權，無廣告、無帳號
 
 > [!NOTE]
-> 兩條路徑共用 `levels` 與 `locale`。只有 Web Component 支援 `theme`、卡片外觀、統計列與 `::part()`。
+> `Static HTML` 描述的是輸出時機，不是單一畫面類型。它可以只輸出地圖、輸出標準分級說明，或輸出完整制縣卡片；只有這條路徑不載入 runtime JavaScript。
 
-### 🗺️ 線上編輯器
+## 先選你想呈現的畫面
 
-不必先手寫 47 個都道府縣的設定。線上編輯器可以完成設定並產生兩條路徑各自要貼進網站的內容。
+| 你需要什麼？ | 選擇 | 前端 JavaScript | 使用的 API 與 CSS |
+| --- | --- | ---: | --- |
+| 在瀏覽器中更新 `levels`、使用 Custom Element | Web Component | 需要 | `<japan-prefecture-map>` |
+| SEO、Pagefind、零 hydration，但要完整分數與統計 | 完整制縣卡片 | 不需要 | `renderWidget()` + `widgetStyles` |
+| 保留網站自己的標題、統計或版面，只借地圖與標準分級 | 地圖加分級說明 | 不需要 | `renderMap()` + `renderLegend()` + `mapStyles` + `legendStyles` |
+| 只需要 47 都道府縣 SVG | 只放地圖 | 不需要 | `renderMap()` + `mapStyles` |
 
-**[開啟 Japan Prefecture Map Editor →](https://japanmap.purr.tw/)**
-
-1. 選擇繁體中文、日文或英文，並點選都道府縣設定旅行等級。
-2. 使用 Web Component 時，選擇亮色、暗色或跟隨系統主題，再按「複製嵌入碼」。
-3. 使用 Static SVG 時，展開「使用 SSR SVG（Astro）」並複製對應程式碼；它不會帶入 `theme`。
-
-設定完成後，直接複製對應程式碼貼進網站；日後只要回到編輯器更新設定，再貼回原本位置即可。
-
-### 🤖 讓 AI 協助加入網站
-
-即使沒有下載這個專案，也可以把以下提示貼給支援 Skills 的 AI：
+完整制縣卡片的組成如下：
 
 ```text
-請使用這個 Skill，協助我把 Japan Prefecture Map 加入目前的網站：
-
-https://github.com/HeiTang/Japan-Prefecture-Map/tree/main/skills/add-japan-prefecture-map
+renderWidget()
+├─ 分數與旅行統計
+├─ renderMap()      地圖 SVG
+└─ renderLegend()   0–5 分級、方法說明與 attribution
 ```
 
-Skill 會檢查你的網站環境，並依需求選擇 Web Component 或 Static SVG，再完成安裝、地圖設定與外觀調整。
+## 安裝與旅行資料
 
-## 共用資料與等級
+```sh
+npm install japan-prefecture-map
+```
 
-### 等級代表什麼？
-
-每個都道府縣只記錄最高等級：
-
-| 等級 | 意義 |
-| ---: | --- |
-| 0 | 尚未去過 |
-| 1 | 只是經過，沒有下車 |
-| 2 | 下車、轉車或短暫停留 |
-| 3 | 去玩或一日遊，但沒有過夜 |
-| 4 | 至少住過一晚 |
-| 5 | 曾經長期生活或工作 |
-
-### 設定 levels
-
-使用日本官方的兩位數都道府縣代碼（JIS）：
+每個都道府縣使用 JIS 兩位數代碼，未列出的縣預設為 Level 0。
 
 ```ts
 import type { PrefectureLevels } from 'japan-prefecture-map/data';
 
-const levels: PrefectureLevels = {
-  '01': 4, // 北海道：住過
-  '13': 4, // 東京：住過
-  '27': 5, // 大阪：曾經生活或工作
-};
+const levels = {
+  '01': 4, // 北海道：住宿
+  '13': 4, // 東京：住宿
+  '27': 5, // 大阪：居住
+} satisfies PrefectureLevels;
 ```
 
-levels 是稀疏資料：沒有寫入的都道府縣就是 Level 0。代碼使用 JIS `01`–`47`，等級限 `0`–`5`。
+| Level | 意義 |
+| ---: | --- |
+| 0 | 未踏：尚未到訪 |
+| 1 | 通過：交通路過，未下車 |
+| 2 | 接地：下車、轉乘或短暫休息 |
+| 3 | 到訪：觀光或一日活動，未過夜 |
+| 4 | 住宿：至少過夜一次 |
+| 5 | 居住：曾長期生活或工作 |
 
-### 統計資料
-
-兩條路徑都可在自己的程式中取得統計：
+若網站要自行顯示分數與統計，可使用：
 
 ```ts
 import { getJapanStats } from 'japan-prefecture-map/data';
 
-getJapanStats({ '01': 4, '13': 4, '27': 5 });
-// {
-//   score: 13,
-//   total: 47,
-//   visited: 3,
-//   stayed: 3,
-//   lived: 1,
-// }
+getJapanStats(levels);
+// { score, total: 47, visited, stayed, lived }
 ```
 
-Web Component 會自動顯示這些數字；Static SVG 只輸出地圖，若需要分數、統計或圖例，可用這個函式依網站版面自行排出。
+## Web Component
 
-## Static SVG (SSR / SSG)
+適合需要在瀏覽器載入、更新 element attribute 或直接嵌入完整卡片的網站。
 
-適合靜態網站、伺服器端渲染、無 hydration，或頁面本身已有統計與版面、只想嵌入地圖的情況。
+```html
+<japan-prefecture-map
+  locale="zh-TW"
+  theme="auto"
+  levels='{"01":4,"13":4,"27":5}'
+></japan-prefecture-map>
 
-`renderMap()` 回傳的是單一可存取 SVG，不會產生 Web Component 卡片、分數、統計、圖例、`theme` 行為或 `part`。
+<script type="module">
+  import 'japan-prefecture-map';
+</script>
+```
 
-### Astro 範例
+Astro、Next.js 等 SSR 框架不要在伺服器端匯入 root entrypoint `japan-prefecture-map`，因為它需要瀏覽器的 Custom Elements API。Astro 請放在一般 `<script>`；Next.js 請在 Client Component 動態載入。
+
+### 純 HTML 或沒有 bundler 的網站
+
+使用固定版號的 jsDelivr URL，不要在已發佈網站使用 `@latest`：
+
+```html
+<japan-prefecture-map
+  locale="zh-TW"
+  theme="auto"
+  levels='{"01":4,"13":4,"27":5}'
+></japan-prefecture-map>
+
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.3.0/dist/index.js';
+</script>
+```
+
+### Web Component 屬性
+
+| 屬性 | 可用值 | 預設值 | 用途 |
+| --- | --- | --- | --- |
+| `levels` | JIS 代碼對應 Level 0–5 的 JSON | `{}` | 旅行資料 |
+| `locale` | `zh-TW`、`ja`、`en` | `zh-TW` | 縣名、統計、圖例語言 |
+| `theme` | `light`、`dark`、`auto` | `auto` | 完整卡片的預設色系 |
+
+## Static HTML renderer：不載入前端 JavaScript
+
+`japan-prefecture-map/render` 不使用 `document`、`window` 或 Custom Elements，可在 Node、Astro frontmatter、Next Server Component、SSG build script 直接呼叫。
+
+每個 renderer 回傳 HTML 字串；每頁或共用 layout 只插入**一次**對應的 CSS 字串。
+
+| 你要呈現的畫面 | 呼叫 renderer | 需要插入的 CSS | 不要再插入 |
+| --- | --- | --- | --- |
+| 只放地圖 | `renderMap()` | `mapStyles` | `widgetStyles` |
+| 加入標準分級說明 | `renderLegend()` | `legendStyles` | `widgetStyles` |
+| 地圖加分級說明 | `renderMap()` + `renderLegend()` | `mapStyles` + `legendStyles` | `widgetStyles` |
+| 完整制縣卡片 | `renderWidget()` | `widgetStyles` | `mapStyles`、`legendStyles` |
+
+> [!NOTE]
+> `widgetStyles` 已包含 `mapStyles` 與 `legendStyles`。使用 `renderWidget()` 時，不要再插入前兩者。
+
+### 完整制縣卡片
+
+適合想要完整分數、統計、地圖、0–5 分級與 attribution，但不想載入前端 JavaScript 的網站。
+
+```astro
+---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import { renderWidget, widgetStyles } from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
+---
+
+<style is:inline set:html={widgetStyles}></style>
+
+<section class="my-japan-map">
+  <div set:html={renderWidget(levels, 'zh-TW', {
+    theme: 'auto',
+    idPrefix: 'profile-japan-map',
+  })}></div>
+</section>
+```
+
+`theme` 只影響已輸出 HTML 的 CSS 預設值，沒有 hydration 或 runtime 行為。
+
+### 地圖加分級說明
+
+適合網站已有自己的標題、翻牌分數、統計列或版面，只需要標準地圖與 0–5 說明。
+
+```astro
+---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import {
+  legendStyles,
+  mapStyles,
+  renderLegend,
+  renderMap,
+} from 'japan-prefecture-map/render';
+
+const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
+---
+
+<style is:inline set:html={mapStyles}></style>
+<style is:inline set:html={legendStyles}></style>
+
+<section class="my-japan-map">
+  <div set:html={renderMap(levels, 'zh-TW', {
+    idPrefix: 'article-japan-map',
+  })}></div>
+  <div set:html={renderLegend('zh-TW', { open: true })}></div>
+</section>
+```
+
+`renderLegend()` 已包含六級說明、方法說明與以下 attribution：
+
+```text
+Made by HeiTang · Map geometry based on JapanEx (MIT)
+```
+
+如果只想把標準分級說明放進 sidebar 或 footer，只保留 `renderLegend()` 與 `legendStyles` 即可：
+
+```astro
+---
+import { legendStyles, renderLegend } from 'japan-prefecture-map/render';
+---
+
+<style is:inline set:html={legendStyles}></style>
+<div set:html={renderLegend('zh-TW', { open: true })}></div>
+```
+
+### 只放地圖
+
+適合已經有自己的圖例、統計或 attribution 排版，只需要 SVG。
 
 ```astro
 ---
@@ -141,7 +238,11 @@ const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
 ---
 
 <style is:inline set:html={mapStyles}></style>
-<div set:html={renderMap(levels, 'zh-TW')} />
+
+<div set:html={renderMap(levels, 'zh-TW', {
+  idPrefix: 'article-japan-map',
+})}></div>
+
 <small>
   Made by <a href="https://github.com/HeiTang">HeiTang</a>
   · Map geometry based on
@@ -149,208 +250,51 @@ const levels = { '01': 4, '13': 4, '27': 5 } satisfies PrefectureLevels;
 </small>
 ```
 
-> [!IMPORTANT]
-> `mapStyles` 每頁或共用 layout 只需引入一次。Static SVG 路徑不要同時匯入根入口 `japan-prefecture-map`，也不要加入 `theme`。
+### Renderer 選項
 
-Astro 範例同樣適用於 Next.js、React Router / Remix、Nuxt、SvelteKit、SolidStart、Vite SSR，以及其他可在伺服器端或建置期載入 ESM 的 SSR / SSG 架構；差別只有各框架插入原始 HTML 字串的語法。Hugo、Jekyll、純 HTML 與多數 CMS 預設應使用 Web Component；如要 Static SVG，請由 Node 建置步驟預先產出 SVG 或 HTML。無論使用哪個架構，都請把 credit 與地圖放在一起。需要分數、統計或圖例時，用 `getJapanStats` 和網站既有元件自行排版。
-
-### Static SVG 地圖樣式
-
-Static SVG 只讀地圖相關變數。將它們放在 `.japan-map` 或包住它的容器：
-
-| 類別 | 變數 | 預設值 |
+| Renderer | 選項 | 用途 |
 | --- | --- | --- |
-| 字型 | `--jpm-map-font` | `ui-sans-serif, system-ui, sans-serif` |
-| 等級 0 | `--jpm-level-0` | `#252b35` |
-| 等級 0 斜線 | `--jpm-level-0-stripe` | `#39404c` |
-| 等級 1 | `--jpm-level-1` | `#ffe3d6` |
-| 等級 2 | `--jpm-level-2` | `#ffc1a5` |
-| 等級 3 | `--jpm-level-3` | `#ff9a6f` |
-| 等級 4 | `--jpm-level-4` | `#f66f41` |
-| 等級 5 | `--jpm-level-5` | `#c9461f` |
+| `renderMap()` | `idPrefix` | SVG title、description、pattern 的 ID 前綴 |
+| `renderMap()` | `interactive` | 加入 keyboard focus 與按鈕語意；不會自動綁定 click handler |
+| `renderLegend()` | `open` | 預設展開原生 `<details>` |
+| `renderWidget()` | `idPrefix` | 內部地圖的 ID 前綴 |
+| `renderWidget()` | `theme` | `light`、`dark`、`auto` 的靜態預設色系 |
+| `renderWidget()` | `legendOpen` | 預設展開完整卡片內的圖例 |
 
-```css
-.japan-map {
-  --jpm-map-font: "Noto Sans JP", sans-serif;
-  --jpm-level-4: #0284c7;
-  --jpm-level-5: #075985;
-}
-```
-
-Static SVG 不支援 `--jpm-surface`、`--jpm-map-glow`、`::part()` 或卡片相關樣式；這些只存在於 Web Component。
-
-## Web Component
-
-適合要直接嵌入完整旅遊卡片的網站。它會在瀏覽器顯示地圖、總分、統計、可展開圖例與 attribution。
-
-### 有 Vite、Astro 或其他前端專案
-
-```sh
-npm install japan-prefecture-map
-```
+> [!NOTE]
+> 單張地圖可使用預設 `idPrefix`。同一頁有兩張以上 `renderMap()` 或 `renderWidget()` 時，必須為每張地圖設定不同前綴，避免 SVG 的 title、description 與 pattern ID 重複：
 
 ```ts
-import 'japan-prefecture-map';
+renderMap(firstLevels, 'zh-TW', { idPrefix: 'home-map' });
+renderMap(secondLevels, 'ja', { idPrefix: 'article-map' });
 ```
 
-```html
-<japan-prefecture-map
-  locale="zh-TW"
-  theme="auto"
-  levels='{"01":4,"13":4,"27":5}'
-></japan-prefecture-map>
-```
+## 外觀客製
 
-### 只有一個 HTML 檔案
+Web Component 使用 `--jpm-*` token 與 `::part()`；Static renderer 使用 `--jpm-*` token 與輸出的 `.jpm-*` class。完整的 CSS 載入方式、token 相容性、公開 `part`、Static renderer class 與 Astro `:global()` 範例見 [Styling Japan Prefecture Map](./docs/styling.md)。
 
-不需要另外安裝工具，直接載入瀏覽器模組即可：
+## Editor 與展示頁
 
-```html
-<!doctype html>
-<html lang="zh-Hant">
-  <body>
-    <japan-prefecture-map levels='{"13":4,"27":5}'></japan-prefecture-map>
+- [Japan Prefecture Map Editor](https://japanmap.purr.tw/)：主入口。設定 locale、theme、levels 與外觀 CSS，選擇 Web Component 或 Static HTML 路徑並複製可直接使用的程式碼。
+- [Web Component demo](https://japanmap.purr.tw/component.html)：在瀏覽器內即時更新 `levels`、`locale` 與 `theme`，檢視 Custom Element runtime 行為。
+- [Static renderer demo](https://japanmap.purr.tw/ssr.html)：檢視沒有 custom element、hydration 或 `<script>` 的完整輸出，並以原生 disclosure 導覽 renderer、recipe 與樣式規則。
 
-    <script type="module">
-      import 'https://cdn.jsdelivr.net/npm/japan-prefecture-map@0.2.1/dist/index.js';
-    </script>
-  </body>
-</html>
-```
+## 無障礙與限制
 
-### 設定資料
-
-將前一節的 `levels` 寫入元素屬性即可：
-
-```ts
-const map = document.querySelector('japan-prefecture-map');
-if (map) map.setAttribute('levels', JSON.stringify(levels));
-```
-
-也可以直接使用 HTML 屬性：
-
-```html
-<japan-prefecture-map
-  locale="en"
-  theme="dark"
-  levels='{"01":4,"13":4,"27":5}'
-></japan-prefecture-map>
-```
-
-#### 可用設定
-
-| 名稱 | 可用值 | 預設值 |
-| --- | --- | --- |
-| `levels` | JIS 代碼對應 `0`–`5` | `{}` |
-| `locale` | `zh-TW`、`ja`、`en` | `zh-TW` |
-| `theme` | `light`、`dark`、`auto` | `auto` |
-
-輸入未知縣市、非整數或 `0`–`5` 以外的數字時，Web Component 會顯示錯誤訊息，不會悄悄產生錯誤地圖。錯誤的語言會回到繁體中文，錯誤的主題會回到自動模式。
-
-## Web Component 外觀與相容性
-
-### 卡片與完整 UI
-
-這一節只說完整卡片的外觀。將變數放在 `japan-prefecture-map`；Static SVG 的可用變數已列在前面的 [Static SVG 地圖樣式](#static-svg-地圖樣式)。
-
-| 類別 | 變數 | 預設值 | 控制內容 |
-| --- | --- | --- | --- |
-| 卡片 | `--jpm-surface` | 深色 `#11151c`；淺色 `#f7f4ef` | 元件卡片主背景 |
-| 卡片 | `--jpm-surface-raised` | 深色 `#1b212b`；淺色 `#fff` | 分數數字、圖例按鈕等凸起區塊背景 |
-| 文字 | `--jpm-text` | 深色 `#f7f8fa`；淺色 `#20252d` | 元件主要文字 |
-| 文字 | `--jpm-muted` | 深色 `#9aa5b4`；淺色 `#626c79` | 分數標籤、統計標籤等次要文字 |
-| 邊框 | `--jpm-border` | 深色 `rgba(255, 255, 255, 0.1)`；淺色 `rgba(32, 37, 45, 0.14)` | 卡片、分數數字、圖例按鈕與色塊邊框 |
-| 強調色 | `--jpm-accent` | `#ff8c61` | 分數數字與預設地圖光暈的基準色 |
-| 地圖 | `--jpm-map-glow` | 以 `--jpm-accent` 產生的中央 radial glow | 地圖後方光暈；設為 `none` 關閉 |
-
-`theme="auto"` 依系統設定使用深色或淺色預設值。地圖標籤字型與各等級顏色見 [Static SVG 地圖樣式](#static-svg-地圖樣式)。
-
-### 常見覆寫
-
-#### Web Component：調整地圖配色
-
-```css
-japan-prefecture-map {
-  --jpm-accent: #0ea5e9;
-  --jpm-level-4: #0284c7;
-  --jpm-level-5: #075985;
-}
-```
-
-#### Web Component：讓地圖融入既有版面
-
-```css
-japan-prefecture-map {
-  --jpm-surface: transparent;
-  --jpm-surface-raised: transparent;
-  --jpm-border: transparent;
-  --jpm-map-glow: none;
-}
-```
-
-### Web Component：用 `part` 隱藏或改寫內建區塊
-
-這是 Web Component 的公開 `part` API：元件 Shadow DOM 裡的每個可客製區塊都標上名稱，外部可用 [`::part()`](https://developer.mozilla.org/docs/Web/CSS/::part) 改樣式。
-
-Static SVG 路徑的 `renderMap()` 只輸出 SVG，沒有 Shadow DOM 或 `part`，因此不能使用 `::part()`；請直接對 `.japan-map` 或外層容器寫一般 CSS。
-
-| `part` 名稱 | 對應區塊 |
-| --- | --- |
-| `widget` | 整張卡片 |
-| `summary` | 上方的分數與統計列 |
-| `score` | 分數的翻牌數字 |
-| `stats` | 已踏足／住宿以上／居住三個數字 |
-| `map` | 地圖本身 |
-| `legend` | 下方的 0–5 分級 |
-
-如果頁面上已經有自己的標題與統計，只想留地圖：
-
-```css
-japan-prefecture-map::part(summary),
-japan-prefecture-map::part(legend) {
-  display: none;
-}
-
-japan-prefecture-map::part(widget) {
-  border: 0;
-  background: none;
-}
-```
-
-`::part()` 只能改樣式，不能改變區塊的順序或內容；也無法選取區塊內部的元素（例如 `::part(summary) .score` 無效），所以需要單獨控制的區塊都已經各自標好 part。
-
-## 專案範圍
-
-這個套件只負責旅行等級的呈現：
-
-- Web Component 額外提供分數、統計與圖例。
-- Static SVG 只提供地圖本身。
-- 不會自動記錄你的旅行
-- 不會儲存資料或建立帳號
-- 不會提供旅遊路線或景點推薦
-- 不會替你的網站產生頁面標題、導覽列或搜尋引擎資料
-
-資料儲存、搜尋引擎呈現方式和互動編輯由使用它的網站決定。專案內的 `demo/` 是設定等級並產生 Web Component 或 Static SVG 程式碼的編輯器。公開元件本身預設是唯讀的。
-
-### 無障礙
-
-- 兩條路徑的地圖都有標題、說明文字、各縣名稱與等級。
-- Web Component 的圖例可以用鍵盤展開。
+- 每張地圖都輸出 title、description、縣名、等級與對應的 `lang`。
+- `renderLegend()` 使用原生 `<details>`，可用鍵盤展開。
+- `renderMap(..., { interactive: true })` 只提供 keyboard focus 與按鈕語意；事件處理由呼叫端負責。
 - Web Component 的分數動畫會遵守系統的「減少動態效果」設定。
-
-### Web Component 瀏覽器支援
-
-- 需要支援網站自訂元件（Custom Elements）、隔離樣式（Shadow DOM）和 SVG 的現代瀏覽器
-- 目前 Chrome、Edge、Firefox、Safari 的近期版本可用；不支援 Internet Explorer
+- 套件不會儲存旅行資料、建立帳號、推薦景點或替網站建立頁面內容。
 
 ## 本機開發
 
 ```sh
 npm install
-npm run build       # 編譯程式並產生 site/
-node scripts/server.mjs # 啟動本機展示頁
-npm test            # 執行資料、安裝和瀏覽器測試
-npm run pack:check  # 查看 npm 套件會包含哪些檔案
+npm run build       # 編譯並產生 site/
+node scripts/server.mjs # 啟動本機 Editor、Web Component 與 SSR demo
+npm test            # Node 與 Playwright 測試
+npm run pack:check  # 檢查 npm tarball 內容
 ```
 
 ## 授權

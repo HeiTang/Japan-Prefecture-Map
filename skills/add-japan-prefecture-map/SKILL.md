@@ -1,6 +1,6 @@
 ---
 name: add-japan-prefecture-map
-description: Guide users through adding Japan Prefecture Map to an existing blog or website. Use when asked to install, embed, integrate, or configure japan-prefecture-map in Astro, Next.js, Vite, Hugo, Jekyll, or plain HTML. Inspect the project, offer guided choices, use the official Editor to collect locale, theme, and levels, then implement either the interactive Web Component or DOM-free server-rendered SVG as appropriate and verify the result.
+description: Guide users through adding Japan Prefecture Map to an existing blog or website. Use when asked to install, embed, integrate, or configure japan-prefecture-map in Astro, Next.js, Vite, Hugo, Jekyll, or plain HTML. Inspect the project, offer guided choices, use the official Editor to collect locale, theme, and levels, then implement either the interactive Web Component or DOM-free server-rendered output as appropriate and verify the result.
 ---
 
 # Add Japan Prefecture Map
@@ -86,13 +86,14 @@ Reject malformed JSON, unsupported attributes that execute code, invalid prefect
 Select automatically when the request makes the answer clear:
 
 1. Web Component (Recommended) — keeps the score, statistics, expandable legend, and Editor-generated embed element. Load it only in the browser.
-2. Server-rendered SVG — emits just the accessible map HTML with no client JavaScript. Use it when the user explicitly requests static HTML, no hydration, or only the map. It does not include the card, score, statistics, legend, or `theme` behavior.
+2. Static widget — emits a complete card with score, statistics, expandable legend, attribution, and no client JavaScript. Use it when static HTML needs the complete presentation.
+3. Static map — emits only the accessible SVG with no client JavaScript. Use it when the page already owns its statistics and layout, or only the map is needed.
 
-Ask only when both paths fit. Do not make a user who only wants a map choose framework terminology.
+Ask only when multiple paths fit. Do not make a user who only wants a map choose framework terminology.
 
 ### 6. Choose how the map fits the site
 
-Skip this step for server-rendered SVG. It has no card surface, glow, or `theme` styling; use the host site's `--jpm-level-*` variables only when map colours need adjustment.
+Skip this step for the static map path. It has no card surface or glow; use the host site's `--jpm-level-*` variables when map colours need adjustment. The static widget accepts the same `--jpm-*` appearance variables and a build-time `theme` option as the Web Component.
 
 Skip this question when the user already chose an appearance. Otherwise inspect the target page, recommend the best fit, and ask with these choices:
 
@@ -131,14 +132,14 @@ japan-prefecture-map::part(legend) {
 }
 ```
 
-Available parts are `widget`, `summary`, `score`, `stats`, `map`, and `legend`. Use them only for the Web Component path; server-rendered SVG has no Shadow DOM or parts.
+Available parts are `widget`, `summary`, `score`, `stats`, `map`, and `legend`. Use them only for the Web Component path; static renderer output has no Shadow DOM or parts.
 
 ### 7. Implement the integration
 
 - Use the site's existing page, layout, component, naming, and styling patterns.
-- Preserve the copied `locale` and `levels`. For server-rendered SVG, `theme` has no runtime effect; use the host stylesheet for map colours when needed.
+- Preserve the copied `locale` and `levels`. For static rendering, never import the root entrypoint or add client JavaScript.
 - For the Web Component path, load the root `japan-prefecture-map` entrypoint only in the browser and preserve the Editor-generated element.
-- For the server-rendered SVG path, import only `mapStyles` and `renderMap` from `japan-prefecture-map/render` in server code. Include `mapStyles` once and do not import the root entrypoint or emit client JavaScript.
+- For the static widget path, import `renderWidget` and `widgetStyles` from `japan-prefecture-map/render`; include `widgetStyles` once. For map-only layouts, import `renderMap` and `mapStyles`; add `renderLegend` and `legendStyles` only when the host needs the supplied 0–5 legend. Use distinct `idPrefix` values when one page renders multiple maps.
 - Keep the map in a readable-width content area. Avoid narrow sidebars unless the user explicitly requests one.
 - Add a page title or section heading by following the site's existing content style.
 - Do not add a framework, wrapper library, state store, or new configuration format for this integration.
@@ -155,10 +156,11 @@ For the Web Component path, when browser control is available, verify:
 - the selected card background and glow behavior match the user's choice;
 - the map fits desktop and mobile widths without horizontal overflow.
 
-For the server-rendered SVG path, verify:
+For static renderer paths, verify:
 
-- the generated page contains one visible `.japan-map` SVG and the selected locale and non-zero levels;
-- `mapStyles` is present once and the SVG has its intended level colours and labels;
+- the generated page contains the selected `.japan-map` SVG output, locale, and non-zero levels;
+- the matching style export is present once and the SVG has its intended level colours and labels;
+- static widget output includes score, statistics, legend, and attribution when that path was selected;
 - the root Web Component entrypoint is not imported or hydrated;
 - the map fits desktop and mobile widths without horizontal overflow.
 
@@ -171,8 +173,8 @@ Report:
 - files changed;
 - page URL or route;
 - installation method and pinned package version;
-- rendering path: Web Component or server-rendered SVG;
+- rendering path: Web Component, static widget, or static map;
 - selected appearance: blended, transparent with glow, or complete card, when using the Web Component;
 - checks that passed;
-- how to change the map later: reopen the Editor, then replace the element settings or the validated `renderMap()` locale and levels;
+- how to change the map later: reopen the Editor, then replace the element settings or the validated renderer locale and levels;
 - any requested commit, push, or deployment as a separate next action.
