@@ -15,11 +15,11 @@ import type { JapanPrefectureMapElement } from './index.js';
 const editorCopy = {
   'zh-TW': {
     subtitle: '基於 JapanEx 延伸的可嵌入都道府縣地圖',
-    description: '點擊地圖設定 Level 0–5，完成後複製嵌入碼。',
+    description: '點擊地圖設定 Level 0–5，完成後選擇整合方式並複製程式碼。',
     github: '在 GitHub 查看原始碼',
     preview: '地圖預覽',
     controls: '編輯設定',
-    locale: '語言',
+    locale: '地圖語言',
     theme: '地圖主題',
     dark: '深色',
     light: '淺色',
@@ -29,25 +29,34 @@ const editorCopy = {
     prefecture: '都道府縣',
     level: '等級',
     embedGuide: '在網站中使用',
-    copy: '複製嵌入碼',
     reset: '重設',
     resetConfirm: '確定要清除所有都道府縣等級嗎？',
     exportImage: '下載 PNG',
     exported: '圖片已下載',
     exportError: '圖片產生失敗，請再試一次',
-    install: '先安裝套件，並在網站程式中匯入：',
+    componentPath: '互動式 Web Component',
+    componentPathHint: '在瀏覽器執行，可透過屬性即時更新地圖。',
+    staticPath: 'Static HTML renderer',
+    staticPathHint: '在建置時輸出完整靜態卡片，沒有前端 JavaScript。',
+    componentInstall: '先安裝套件，並在網站程式中匯入：',
     embed: '再貼入產生的元件：',
-    copied: '嵌入碼已複製',
-    copyError: '複製失敗，請手動選取嵌入碼',
-    ssrSummary: '不想載入前端 JavaScript？使用 SSR SVG（Astro）',
-    ssrHint: '這段程式會在建置時輸出純 SVG；主題與配色請在網站 CSS 覆寫。',
-    ssrCopy: '複製 Astro SSR 程式碼',
-    ssrCopied: 'Astro SSR 程式碼已複製',
-    ssrCopyError: '複製失敗，請手動選取 Astro SSR 程式碼',
+    copy: '複製 Web Component 程式碼',
+    copied: 'Web Component 程式碼已複製',
+    copyError: '複製失敗，請手動選取 Web Component 程式碼',
+    staticInstall: '先安裝套件，再於建置時輸出靜態 HTML：',
+    staticHint: '以下為完整卡片的 Astro 範例，包含統計、圖例與 attribution。',
+    staticCopy: '複製 Static HTML 程式碼',
+    staticCopied: 'Static HTML 程式碼已複製',
+    staticCopyError: '複製失敗，請手動選取 Static HTML 程式碼',
+    staticDemo: '查看零 JavaScript 實際輸出',
+    componentDemo: '查看 Web Component runtime demo',
+    routeEditor: '建立地圖',
+    routeComponent: 'Web Component',
+    routeStatic: 'Static HTML',
   },
   ja: {
     subtitle: 'JapanExを基にした埋め込み可能な都道府県マップ',
-    description: '地図でレベル0〜5を設定し、埋め込みコードをコピーします。',
+    description: '地図でレベル0〜5を設定し、統合方法を選んでコードをコピーします。',
     github: 'GitHubでソースコードを見る',
     preview: '地図プレビュー',
     controls: '編集設定',
@@ -61,25 +70,34 @@ const editorCopy = {
     prefecture: '都道府県',
     level: 'レベル',
     embedGuide: 'サイトで使用',
-    copy: '埋め込みコードをコピー',
     reset: 'リセット',
     resetConfirm: 'すべての都道府県レベルを消去しますか？',
     exportImage: 'PNGを保存',
     exported: '画像を保存しました',
     exportError: '画像を作成できませんでした。もう一度お試しください',
-    install: 'パッケージをインストールし、サイトのコードで読み込みます：',
+    componentPath: 'インタラクティブ Web Component',
+    componentPathHint: 'ブラウザで動作し、属性で地図を動的に更新できます。',
+    staticPath: 'Static HTML renderer',
+    staticPathHint: 'ビルド時に完全な静的カードを出力し、フロントエンド JavaScript は不要です。',
+    componentInstall: 'パッケージをインストールし、サイトのコードで読み込みます：',
     embed: '生成されたコンポーネントを貼り付けます：',
-    copied: '埋め込みコードをコピーしました',
-    copyError: 'コピーできませんでした。コードを手動で選択してください',
-    ssrSummary: 'フロントエンド JavaScript なしで使う：SSR SVG（Astro）',
-    ssrHint: 'このコードはビルド時に SVG を出力します。テーマと配色はサイトの CSS で上書きしてください。',
-    ssrCopy: 'Astro SSR コードをコピー',
-    ssrCopied: 'Astro SSR コードをコピーしました',
-    ssrCopyError: 'コピーできませんでした。Astro SSR コードを手動で選択してください',
+    copy: 'Web Component コードをコピー',
+    copied: 'Web Component コードをコピーしました',
+    copyError: 'コピーできませんでした。Web Component コードを手動で選択してください',
+    staticInstall: 'パッケージをインストールし、ビルド時に静的 HTML を出力します：',
+    staticHint: '統計、凡例、帰属情報を含む完全なカードの Astro 例です。',
+    staticCopy: 'Static HTML コードをコピー',
+    staticCopied: 'Static HTML コードをコピーしました',
+    staticCopyError: 'コピーできませんでした。Static HTML コードを手動で選択してください',
+    staticDemo: 'JavaScript なしの実際の出力を見る',
+    componentDemo: 'Web Component runtime demoを見る',
+    routeEditor: '地図を作成',
+    routeComponent: 'Web Component',
+    routeStatic: 'Static HTML',
   },
   en: {
     subtitle: 'A Web Component adaptation of JapanEx',
-    description: 'Set Levels 0–5 on the map, then copy the embed code.',
+    description: 'Set Levels 0–5, choose an integration path, then copy the code.',
     github: 'View source on GitHub',
     preview: 'Map preview',
     controls: 'Editor settings',
@@ -93,21 +111,30 @@ const editorCopy = {
     prefecture: 'Prefecture',
     level: 'Level',
     embedGuide: 'Use on your site',
-    copy: 'Copy embed code',
     reset: 'Reset',
     resetConfirm: 'Clear all prefecture levels?',
     exportImage: 'Download PNG',
     exported: 'Image downloaded',
     exportError: 'Could not create the image. Try again.',
-    install: 'Install the package and import it in your site code:',
+    componentPath: 'Interactive Web Component',
+    componentPathHint: 'Runs in the browser and updates through element attributes.',
+    staticPath: 'Static HTML renderer',
+    staticPathHint: 'Outputs a complete static card at build time with no client JavaScript.',
+    componentInstall: 'Install the package and import it in your site code:',
     embed: 'Then paste the generated component:',
-    copied: 'Embed code copied',
-    copyError: 'Copy failed. Select the embed code manually.',
-    ssrSummary: 'Need SVG without client-side JavaScript? Use SSR SVG (Astro)',
-    ssrHint: 'This renders a static SVG at build time. Override colors in your site CSS.',
-    ssrCopy: 'Copy Astro SSR code',
-    ssrCopied: 'Astro SSR code copied',
-    ssrCopyError: 'Copy failed. Select the Astro SSR code manually.',
+    copy: 'Copy Web Component code',
+    copied: 'Web Component code copied',
+    copyError: 'Copy failed. Select the Web Component code manually.',
+    staticInstall: 'Install the package, then render static HTML at build time:',
+    staticHint: 'This Astro example renders a complete card with stats, a legend, and attribution.',
+    staticCopy: 'Copy Static HTML code',
+    staticCopied: 'Static HTML code copied',
+    staticCopyError: 'Copy failed. Select the Static HTML code manually.',
+    staticDemo: 'View the zero-JavaScript output',
+    componentDemo: 'View the Web Component runtime demo',
+    routeEditor: 'Build a map',
+    routeComponent: 'Web Component',
+    routeStatic: 'Static HTML',
   },
 } as const satisfies Record<JapanMapLocale, Record<string, string>>;
 
@@ -117,7 +144,7 @@ function required<T extends Element>(selector: string): T {
   return element;
 }
 
-function track(event: 'copy_embed_code' | 'download_png') {
+function track(event: 'copy_embed_code' | 'copy_static_code' | 'download_png' | 'select_component_path' | 'select_static_path' | 'open_component_demo' | 'open_static_demo') {
   (window as typeof window & { gtag?: (command: 'event', event: string) => void }).gtag?.('event', event);
 }
 
@@ -127,6 +154,9 @@ const controls = required<HTMLElement>('#controls');
 const pageSubtitle = required<HTMLElement>('#page-subtitle');
 const pageDescription = required<HTMLElement>('#page-description');
 const githubLink = required<HTMLAnchorElement>('#github-link');
+const routeEditor = required<HTMLAnchorElement>('#route-editor');
+const routeComponent = required<HTMLAnchorElement>('#route-component');
+const routeStatic = required<HTMLAnchorElement>('#route-static');
 const localeSelect = required<HTMLSelectElement>('#locale');
 const localeLabel = required<HTMLLabelElement>('#locale-label');
 const themeSelect = required<HTMLSelectElement>('#theme');
@@ -134,6 +164,17 @@ const themeLabel = required<HTMLLabelElement>('#theme-label');
 const themeDark = required<HTMLOptionElement>('#theme-dark');
 const themeLight = required<HTMLOptionElement>('#theme-light');
 const themeAuto = required<HTMLOptionElement>('#theme-auto');
+const desktopPrefectureSelect = required<HTMLSelectElement>('#desktop-prefecture');
+const desktopLevelSelect = required<HTMLSelectElement>('#desktop-level');
+const styleAccent = required<HTMLInputElement>('#style-accent');
+const styleLevelOne = required<HTMLInputElement>('#style-level-one');
+const styleLevelTwo = required<HTMLInputElement>('#style-level-two');
+const styleLevelThree = required<HTMLInputElement>('#style-level-three');
+const styleLevelFour = required<HTMLInputElement>('#style-level-four');
+const styleLevelFive = required<HTMLInputElement>('#style-level-five');
+const styleDensity = required<HTMLSelectElement>('#style-density');
+const styleGlow = required<HTMLInputElement>('#style-glow');
+const previewStyleOverrides = required<HTMLStyleElement>('#preview-style-overrides');
 const mobileEditorTitle = required<HTMLElement>('#mobile-editor-title');
 const prefectureLabel = required<HTMLLabelElement>('#prefecture-label');
 const prefectureSelect = required<HTMLSelectElement>('#prefecture');
@@ -142,49 +183,183 @@ const mobileLevelSelect = required<HTMLSelectElement>('#mobile-level');
 const levelGuideTitle = required<HTMLElement>('#level-guide-title');
 const levelList = required<HTMLOListElement>('#level-list');
 const embedGuideTitle = required<HTMLElement>('#embed-guide-title');
+const embedGuide = required<HTMLElement>('#embed-guide');
+const componentPathButton = required<HTMLButtonElement>('#component-path');
+const componentPathLabel = required<HTMLElement>('#component-path-label');
+const componentPathHint = required<HTMLElement>('#component-path-hint');
+const staticPathButton = required<HTMLButtonElement>('#static-path');
+const staticPathLabel = required<HTMLElement>('#static-path-label');
+const staticPathHint = required<HTMLElement>('#static-path-hint');
+const componentPanel = required<HTMLElement>('#component-panel');
+const staticPanel = required<HTMLElement>('#static-panel');
+const componentInstallHint = required<HTMLElement>('#component-install-hint');
 const markup = required<HTMLElement>('#markup');
 const copyButton = required<HTMLButtonElement>('#copy');
-const ssrSummary = required<HTMLElement>('#ssr-summary');
-const ssrHint = required<HTMLElement>('#ssr-hint');
-const ssrMarkup = required<HTMLElement>('#ssr-markup');
-const ssrCopyButton = required<HTMLButtonElement>('#copy-ssr');
+const staticInstallHint = required<HTMLElement>('#static-install-hint');
+const staticIdPrefix = required<HTMLInputElement>('#static-id-prefix');
+const staticHint = required<HTMLElement>('#static-hint');
+const staticMarkup = required<HTMLElement>('#static-markup');
+const staticCopyButton = required<HTMLButtonElement>('#copy-static');
+const staticDemoLink = required<HTMLAnchorElement>('#static-demo-link');
+const componentDemoLink = required<HTMLAnchorElement>('#component-demo-link');
 const resetButton = required<HTMLButtonElement>('#reset');
 const resetButtonLabel = required<HTMLElement>('#reset span');
 const exportButton = required<HTMLButtonElement>('#export-image');
 const exportButtonLabel = required<HTMLElement>('#export-image span');
 const mapActionStatus = required<HTMLElement>('#map-action-status');
 const copyStatus = required<HTMLElement>('#copy-status');
-const ssrCopyStatus = required<HTMLElement>('#ssr-copy-status');
-const installHint = required<HTMLElement>('#install-hint');
+const staticCopyStatus = required<HTMLElement>('#static-copy-status');
 const embedHint = required<HTMLElement>('#embed-hint');
 
 let levels: PrefectureLevels = {};
 let selectedPrefecture: PrefectureCode = '01';
+type IntegrationPath = 'component' | 'static';
+const appearanceClass = 'japan-travel-map';
+
+function integrationPathFromLocation(): IntegrationPath {
+  return new URLSearchParams(window.location.search).get('path') === 'static' ? 'static' : 'component';
+}
+
+let integrationPath = integrationPathFromLocation();
+
+function mapGlowValue() {
+  return styleGlow.checked
+    ? `radial-gradient(ellipse at center, color-mix(in srgb, ${styleAccent.value} 9%, transparent), transparent 64%)`
+    : 'none';
+}
+
+function appearanceVariables(indent: string) {
+  return [
+    `--jpm-accent: ${styleAccent.value};`,
+    `--jpm-level-1: ${styleLevelOne.value};`,
+    `--jpm-level-2: ${styleLevelTwo.value};`,
+    `--jpm-level-3: ${styleLevelThree.value};`,
+    `--jpm-level-4: ${styleLevelFour.value};`,
+    `--jpm-level-5: ${styleLevelFive.value};`,
+    `--jpm-map-glow: ${mapGlowValue()};`,
+  ].map(value => `${indent}${value}`).join('\n');
+}
+
+function updateAppearance() {
+  preview.style.setProperty('--jpm-accent', styleAccent.value);
+  preview.style.setProperty('--jpm-level-1', styleLevelOne.value);
+  preview.style.setProperty('--jpm-level-2', styleLevelTwo.value);
+  preview.style.setProperty('--jpm-level-3', styleLevelThree.value);
+  preview.style.setProperty('--jpm-level-4', styleLevelFour.value);
+  preview.style.setProperty('--jpm-level-5', styleLevelFive.value);
+  preview.style.setProperty('--jpm-map-glow', mapGlowValue());
+  controls.style.setProperty('--jpm-level-1', styleLevelOne.value);
+  controls.style.setProperty('--jpm-level-2', styleLevelTwo.value);
+  controls.style.setProperty('--jpm-level-3', styleLevelThree.value);
+  controls.style.setProperty('--jpm-level-4', styleLevelFour.value);
+  controls.style.setProperty('--jpm-level-5', styleLevelFive.value);
+  previewStyleOverrides.textContent = styleDensity.value === 'compact'
+    ? `#preview::part(summary) { padding-block: 1rem 0.5rem; }\n#preview::part(widget) { border-radius: 0.7rem; }`
+    : '';
+}
+
+function appearanceCss(path: IntegrationPath) {
+  const rules = [`.${appearanceClass} {\n${appearanceVariables('  ')}\n}`];
+  if (styleDensity.value === 'compact') {
+    rules.push(path === 'component'
+      ? `.${appearanceClass}::part(summary) { padding-block: 1rem 0.5rem; }\n.${appearanceClass}::part(widget) { border-radius: 0.7rem; }`
+      : `/* Astro scopes component styles; set:html output needs :global(). */\n.${appearanceClass} :global(.jpm-summary) { padding-block: 1rem 0.5rem; }\n.${appearanceClass} :global(.jpm-widget) { border-radius: 0.7rem; }`);
+  }
+  return `<style>\n${rules.join('\n\n')}\n</style>`;
+}
+
+function clearCopyStatus() {
+  copyStatus.textContent = '';
+  staticCopyStatus.textContent = '';
+}
+
+function staticIdPrefixValue() {
+  const value = staticIdPrefix.value.trim();
+  const valid = /^[A-Za-z][A-Za-z0-9_.:-]*$/.test(value);
+  staticIdPrefix.setCustomValidity(valid ? '' : 'ID 前綴必須以英文字母開頭，且只包含英數、_、.、: 或 -。');
+  return valid ? value : appearanceClass;
+}
+
+function updateGeneratedCode() {
+  const value = JSON.stringify(sparseLevels(levels));
+  const idPrefix = staticIdPrefixValue();
+  markup.textContent = `${appearanceCss('component')}
+
+<japan-prefecture-map
+  class="${appearanceClass}"
+  locale="${preview.locale}"
+  theme="${preview.theme}"
+  levels='${value}'
+></japan-prefecture-map>`;
+  staticMarkup.textContent = `---
+import type { PrefectureLevels } from 'japan-prefecture-map/data';
+import { renderWidget, widgetStyles } from 'japan-prefecture-map/render';
+
+const levels = ${value} satisfies PrefectureLevels;
+---
+
+<!-- Include widgetStyles once per page. -->
+<style is:inline set:html={widgetStyles}></style>
+${appearanceCss('static')}
+<div class="${appearanceClass}" set:html={renderWidget(levels, '${preview.locale}', { theme: '${preview.theme}', idPrefix: '${idPrefix}' })} />`;
+  updateIntegrationPath();
+}
+
+function refreshAppearance() {
+  clearCopyStatus();
+  updateAppearance();
+  updateGeneratedCode();
+}
+
+function updateIntegrationPath() {
+  const component = integrationPath === 'component';
+  embedGuide.dataset.integrationPath = integrationPath;
+  componentPathButton.setAttribute('aria-pressed', String(component));
+  staticPathButton.setAttribute('aria-pressed', String(!component));
+  componentPanel.hidden = !component;
+  staticPanel.hidden = component;
+}
+
+function setIntegrationPath(path: IntegrationPath, updateUrl = false) {
+  integrationPath = path;
+  if (updateUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('path', path);
+    window.history.replaceState(null, '', url);
+  }
+  updateIntegrationPath();
+}
 
 function decorateMap() {
   const map = preview.shadowRoot?.querySelector<SVGElement>('.japan-map');
   if (!map) return;
 
   map.dataset.interactive = 'true';
-  map.querySelectorAll<SVGGElement>('.prefecture').forEach(prefecture => {
+  map.setAttribute('role', 'group');
+  map.querySelectorAll<SVGGElement>('.jpm-prefecture').forEach(prefecture => {
     prefecture.setAttribute('role', 'button');
     prefecture.setAttribute('tabindex', '0');
   });
 }
 
 function update() {
+  clearCopyStatus();
+  updateAppearance();
   preview.levels = levels;
   preview.locale = localeSelect.value as JapanMapLocale;
   preview.theme = themeSelect.value as JapanMapTheme;
   const locale = preview.locale;
-  const copy = editorCopy[locale];
+  const copy = editorCopy['zh-TW'];
 
-  document.documentElement.lang = locale === 'zh-TW' ? 'zh-Hant' : locale;
+  document.documentElement.lang = 'zh-Hant';
   document.title = `${copy.subtitle} · Japan Prefecture Map`;
   pageSubtitle.textContent = copy.subtitle;
   pageDescription.textContent = copy.description;
   githubLink.setAttribute('aria-label', copy.github);
   githubLink.title = copy.github;
+  routeEditor.textContent = copy.routeEditor;
+  routeComponent.textContent = copy.routeComponent;
+  routeStatic.textContent = copy.routeStatic;
   previewSection.setAttribute('aria-label', copy.preview);
   controls.setAttribute('aria-label', copy.controls);
   localeLabel.textContent = copy.locale;
@@ -200,47 +375,52 @@ function update() {
   copyButton.textContent = copy.copy;
   resetButtonLabel.textContent = copy.reset;
   exportButtonLabel.textContent = copy.exportImage;
-  installHint.textContent = copy.install;
+  componentPathLabel.textContent = copy.componentPath;
+  componentPathHint.textContent = copy.componentPathHint;
+  staticPathLabel.textContent = copy.staticPath;
+  staticPathHint.textContent = copy.staticPathHint;
+  componentInstallHint.textContent = copy.componentInstall;
   embedHint.textContent = copy.embed;
-  ssrSummary.textContent = copy.ssrSummary;
-  ssrHint.textContent = copy.ssrHint;
-  ssrCopyButton.textContent = copy.ssrCopy;
-  prefectureSelect.innerHTML = prefectures.map(prefecture => `<option value="${prefecture.code}">${prefecture.names[locale]}</option>`).join('');
+  staticInstallHint.textContent = copy.staticInstall;
+  staticHint.textContent = copy.staticHint;
+  staticCopyButton.textContent = copy.staticCopy;
+  staticDemoLink.textContent = copy.staticDemo;
+  componentDemoLink.textContent = copy.componentDemo;
+  const prefectureOptions = prefectures.map(prefecture => `<option value="${prefecture.code}">${prefecture.names[locale]}</option>`).join('');
+  prefectureSelect.innerHTML = prefectureOptions;
+  desktopPrefectureSelect.innerHTML = prefectureOptions;
   prefectureSelect.value = selectedPrefecture;
-  mobileLevelSelect.innerHTML = levelLabels[locale].map((item, level) => `<option value="${level}">Level ${level} · ${item.label}</option>`).join('');
+  desktopPrefectureSelect.value = selectedPrefecture;
+  const levelOptions = levelLabels[locale].map((item, level) => `<option value="${level}">Level ${level} · ${item.label}</option>`).join('');
+  mobileLevelSelect.innerHTML = levelOptions;
+  desktopLevelSelect.innerHTML = levelOptions;
   mobileLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
+  desktopLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
   levelList.innerHTML = levelLabels[locale].map((item, level) => `<li class="level-item"><span class="level-swatch" data-level="${level}" aria-hidden="true"></span><span class="level-copy"><strong>Level ${level} · ${item.label}</strong> — ${item.description}</span></li>`).join('');
   decorateMap();
 
-  const value = JSON.stringify(sparseLevels(levels));
-  markup.textContent = `<japan-prefecture-map\n  locale="${preview.locale}"\n  theme="${preview.theme}"\n  levels='${value}'\n></japan-prefecture-map>`;
-  ssrMarkup.textContent = `---
-import type { PrefectureLevels } from 'japan-prefecture-map/data';
-import { mapStyles, renderMap } from 'japan-prefecture-map/render';
-
-const levels = ${value} satisfies PrefectureLevels;
----
-
-<!-- Include mapStyles once per page. -->
-<style is:inline set:html={mapStyles} />
-<div set:html={renderMap(levels, '${preview.locale}')} />
-<small>Made by <a href="https://github.com/HeiTang">HeiTang</a> · Map geometry based on <a href="https://github.com/ukyouz/JapanEx">JapanEx</a> (MIT)</small>`;
+  updateGeneratedCode();
 }
 
-function setPrefectureLevel(code: PrefectureCode, level: 0 | 1 | 2 | 3 | 4 | 5) {
+function setPrefectureLevel(code: PrefectureCode, level: 0 | 1 | 2 | 3 | 4 | 5, restoreFocus = false) {
   const next = { ...levels };
   if (level === 0) delete next[code];
   else next[code] = level;
   levels = next;
   selectedPrefecture = code;
   update();
+  if (!restoreFocus) return;
+
+  const name = prefectures.find(prefecture => prefecture.code === code)?.names[preview.locale] ?? code;
+  mapActionStatus.textContent = `${name} 已設為 Level ${level}。`;
+  window.requestAnimationFrame(() => preview.shadowRoot?.querySelector<SVGGElement>(`[data-code="${code}"]`)?.focus());
 }
 
-function selectPrefecture(target: EventTarget | null) {
-  const element = target instanceof Element ? target.closest<SVGGElement>('.prefecture') : null;
+function selectPrefecture(target: EventTarget | null, restoreFocus = false) {
+  const element = target instanceof Element ? target.closest<SVGGElement>('.jpm-prefecture') : null;
   const code = element?.dataset.code as PrefectureCode | undefined;
   if (!code) return;
-  setPrefectureLevel(code, (((levels[code] ?? 0) + 1) % 6) as 0 | 1 | 2 | 3 | 4 | 5);
+  setPrefectureLevel(code, (((levels[code] ?? 0) + 1) % 6) as 0 | 1 | 2 | 3 | 4 | 5, restoreFocus);
 }
 
 preview.shadowRoot?.addEventListener('click', event => selectPrefecture(event.target));
@@ -248,30 +428,57 @@ preview.shadowRoot?.addEventListener('keydown', event => {
   if (!(event instanceof KeyboardEvent)) return;
   if (event.key !== 'Enter' && event.key !== ' ') return;
   event.preventDefault();
-  selectPrefecture(event.target);
+  selectPrefecture(event.target, true);
 });
 
 localeSelect.addEventListener('change', () => {
   mapActionStatus.textContent = '';
-  copyStatus.textContent = '';
-  ssrCopyStatus.textContent = '';
   update();
 });
 themeSelect.addEventListener('change', update);
+[styleAccent, styleLevelOne, styleLevelTwo, styleLevelThree, styleLevelFour, styleLevelFive].forEach(input => input.addEventListener('input', refreshAppearance));
+styleDensity.addEventListener('change', refreshAppearance);
+styleGlow.addEventListener('change', refreshAppearance);
+staticIdPrefix.addEventListener('input', () => {
+  clearCopyStatus();
+  updateGeneratedCode();
+});
 prefectureSelect.addEventListener('change', () => {
   selectedPrefecture = prefectureSelect.value as PrefectureCode;
   mobileLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
+  desktopPrefectureSelect.value = selectedPrefecture;
+  desktopLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
 });
 mobileLevelSelect.addEventListener('change', () => {
   setPrefectureLevel(selectedPrefecture, Number(mobileLevelSelect.value) as 0 | 1 | 2 | 3 | 4 | 5);
 });
+desktopPrefectureSelect.addEventListener('change', () => {
+  selectedPrefecture = desktopPrefectureSelect.value as PrefectureCode;
+  prefectureSelect.value = selectedPrefecture;
+  mobileLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
+  desktopLevelSelect.value = String(levels[selectedPrefecture] ?? 0);
+});
+desktopLevelSelect.addEventListener('change', () => {
+  setPrefectureLevel(selectedPrefecture, Number(desktopLevelSelect.value) as 0 | 1 | 2 | 3 | 4 | 5);
+});
+componentPathButton.addEventListener('click', () => {
+  track('select_component_path');
+  setIntegrationPath('component', true);
+});
+staticPathButton.addEventListener('click', () => {
+  track('select_static_path');
+  setIntegrationPath('static', true);
+});
+componentDemoLink.addEventListener('click', () => track('open_component_demo'));
+staticDemoLink.addEventListener('click', () => track('open_static_demo'));
+window.addEventListener('popstate', () => setIntegrationPath(integrationPathFromLocation()));
 resetButton.addEventListener('click', () => {
-  const copy = editorCopy[preview.locale];
+  const copy = editorCopy['zh-TW'];
   if (Object.keys(levels).length > 0 && !window.confirm(copy.resetConfirm)) return;
   levels = {};
   mapActionStatus.textContent = '';
   copyStatus.textContent = '';
-  ssrCopyStatus.textContent = '';
+  staticCopyStatus.textContent = '';
   update();
 });
 
@@ -322,11 +529,11 @@ function svgText(content: string, attributes: Record<string, string>) {
 
 async function mapPng(): Promise<Blob> {
   const map = preview.shadowRoot?.querySelector<SVGSVGElement>('.japan-map');
-  const widget = preview.shadowRoot?.querySelector<HTMLElement>('.widget');
-  const scoreElement = preview.shadowRoot?.querySelector<HTMLElement>('.score');
-  const scoreLabel = preview.shadowRoot?.querySelector<HTMLElement>('.score-label');
-  const levelZero = map?.querySelector<SVGElement>('.level-zero');
-  const levelZeroStripe = map?.querySelector<SVGElement>('.level-zero-stripe');
+  const widget = preview.shadowRoot?.querySelector<HTMLElement>('.jpm-widget');
+  const scoreElement = preview.shadowRoot?.querySelector<HTMLElement>('.jpm-score');
+  const scoreLabel = preview.shadowRoot?.querySelector<HTMLElement>('.jpm-score-label');
+  const levelZero = map?.querySelector<SVGElement>('.jpm-level-zero');
+  const levelZeroStripe = map?.querySelector<SVGElement>('.jpm-level-zero-stripe');
   if (!map || !widget || !scoreElement || !scoreLabel || !levelZero || !levelZeroStripe) throw new Error('Map is not ready');
 
   const clone = map.cloneNode(true) as SVGSVGElement;
@@ -337,8 +544,8 @@ async function mapPng(): Promise<Blob> {
   clone.setAttribute('height', '1120');
   clone.removeAttribute('data-interactive');
   clone.querySelectorAll('[tabindex]').forEach(element => element.removeAttribute('tabindex'));
-  clone.querySelectorAll<SVGTextElement>('.map-label').forEach(label => {
-    const small = label.classList.contains('small-label');
+  clone.querySelectorAll<SVGTextElement>('.jpm-map-label').forEach(label => {
+    const small = label.classList.contains('jpm-small-label');
     label.style.setProperty('font-size', preview.locale === 'en' ? (small ? '11px' : '14px') : (small ? '17px' : '22px'));
   });
 
@@ -512,7 +719,7 @@ async function mapPng(): Promise<Blob> {
 }
 
 exportButton.addEventListener('click', async () => {
-  const copy = editorCopy[preview.locale];
+  const copy = editorCopy['zh-TW'];
   exportButton.disabled = true;
   exportButton.setAttribute('aria-busy', 'true');
   mapActionStatus.textContent = '';
@@ -535,7 +742,7 @@ exportButton.addEventListener('click', async () => {
 });
 
 copyButton.addEventListener('click', async () => {
-  const copy = editorCopy[preview.locale];
+  const copy = editorCopy['zh-TW'];
   try {
     await navigator.clipboard.writeText(markup.textContent ?? '');
     copyStatus.textContent = copy.copied;
@@ -545,16 +752,16 @@ copyButton.addEventListener('click', async () => {
   }
 });
 
-ssrCopyButton.addEventListener('click', async () => {
-  const copy = editorCopy[preview.locale];
+staticCopyButton.addEventListener('click', async () => {
+  const copy = editorCopy['zh-TW'];
   try {
-    await navigator.clipboard.writeText(ssrMarkup.textContent ?? '');
-    ssrCopyStatus.textContent = copy.ssrCopied;
+    await navigator.clipboard.writeText(staticMarkup.textContent ?? '');
+    staticCopyStatus.textContent = copy.staticCopied;
+    track('copy_static_code');
   } catch {
-    ssrCopyStatus.textContent = copy.ssrCopyError;
+    staticCopyStatus.textContent = copy.staticCopyError;
   }
 });
 
-const browserLanguage = navigator.languages.find(language => /^(zh|ja|en)(-|$)/i.test(language)) ?? 'en';
-localeSelect.value = browserLanguage.toLowerCase().startsWith('zh') ? 'zh-TW' : browserLanguage.toLowerCase().startsWith('ja') ? 'ja' : 'en';
+localeSelect.value = 'zh-TW';
 update();
