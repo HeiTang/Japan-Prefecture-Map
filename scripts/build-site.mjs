@@ -5,6 +5,9 @@ const site = new URL('../site/', import.meta.url);
 await rm(site, { force: true, recursive: true });
 await mkdir(site, { recursive: true });
 await cp(new URL('../demo/index.html', import.meta.url), new URL('index.html', site));
+await cp(new URL('../demo/favicon.svg', import.meta.url), new URL('favicon.svg', site));
+await cp(new URL('../demo/favicon.png', import.meta.url), new URL('favicon.png', site));
+await cp(new URL('../demo/favicon.ico', import.meta.url), new URL('favicon.ico', site));
 await cp(new URL('../demo/component.html', import.meta.url), new URL('component.html', site));
 await cp(new URL('../dist/', import.meta.url), new URL('dist/', site), { recursive: true });
 
