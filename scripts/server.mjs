@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { extname, join, resolve } from 'node:path';
 
 const root = resolve(new URL('../site/', import.meta.url).pathname);
-const types = { '.css': 'text/css', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
+const types = { '.css': 'text/css', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/vnd.microsoft.icon' };
 
 createServer(async (request, response) => {
   const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
