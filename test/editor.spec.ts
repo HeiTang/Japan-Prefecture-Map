@@ -251,6 +251,7 @@ test('tracks successful copy and PNG downloads', async ({ page }) => {
 
 test('opens an integration path from the URL', async ({ page }) => {
   await page.goto('/?path=static');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://japanmap.purr.tw/');
   await expect(page.locator('#static-path')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#static-panel')).toBeVisible();
   await expect(page.locator('#embed-guide')).toHaveAttribute('data-integration-path', 'static');
@@ -258,6 +259,9 @@ test('opens an integration path from the URL', async ({ page }) => {
   await page.click('#component-path');
   await expect(page).toHaveURL(/\?path=component$/);
   await expect(page.locator('#component-panel')).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://japanmap.purr.tw/');
+  await page.reload();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://japanmap.purr.tw/');
 });
 
 test('offers precise prefecture and level controls on mobile', async ({ page }) => {
